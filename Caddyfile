@@ -1,0 +1,31 @@
+{
+	# Disable Caddy's admin API endpoint — nothing needs to mutate it at runtime
+	admin off
+	# ACME account email for Let's Encrypt notices (optional)
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	# Compress text responses
+	encode zstd gzip
+
+	# Hide implementation details
+	header -Server
+	header -X-Powered-By
+
+	# HSTS lives here so it is applied even to responses served directly
+	# by Caddy (errors/redirects), matching Django's own HSTS config.
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+	header X-Content-Type-Options "nosniff"
+	header X-Frame-Options "DENY"
+	header Referrer-Policy "strict-origin-when-cross-origin"
+	header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+
+	# NOTE: Content-Security-Policy is intentionally NOT set here.
+	# The Django SecurityHeadersMiddleware sets a nonce-based CSP;
+	# duplicating it at the proxy would break inline-nonce scripts.
+
+	reverse_proxy web:8000 {
+		header_up X-Real-IP {remote_host}
+	}
+}

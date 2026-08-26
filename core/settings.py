@@ -35,10 +35,8 @@ if TESTING:
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    'SECRET_KEY',
-    'django-insecure-2wc3_ftvs2(cyo66l=ee8o90gkt_q!c=hb(4s00#gm2cfk@z(+'  # fallback for dev only
-)
+_INSECURE_DEV_SECRET = 'django-insecure-2wc3_ftvs2(cyo66l=ee8o90gkt_q!c=hb(4s00#gm2cfk@z(+'
+SECRET_KEY = os.getenv('SECRET_KEY', _INSECURE_DEV_SECRET)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
@@ -47,12 +45,48 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 _allowed_hosts = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 ALLOWED_HOSTS = [host.strip() for host in _allowed_hosts]
 
-# Add ngrok domain pattern support for tunneling
-ALLOWED_HOSTS.extend([
-    '*.ngrok-free.dev',
-    '.ngrok-free.dev',
-    'ngrok-free.dev',
-])
+# Add ngrok domain pattern support while TUNNELING IN DEVELOPMENT ONLY.
+# Keeping *.ngrok-free.dev out of production ALLOWED_HOSTS avoids trusting
+# attacker-controlled ngrok subdomains as valid Host headers.
+if DEBUG:
+    ALLOWED_HOSTS.extend([
+        '*.ngrok-free.dev',
+        '.ngrok-free.dev',
+        'ngrok-free.dev',
+    ])
+
+# ------------------------------------------------------------------
+# PRODUCTION BOOT GUARD (fail-safe, not fail-open)
+# In production (DEBUG=False) the app refuses to start unless a real,
+# unique SECRET_KEY and explicit ALLOWED_HOSTS are provided. This makes
+# it impossible to accidentally expose an instance signed with the
+# well-known dev key (session/CSRF/remember-me forgery risk) or with
+# an open host header.
+# ------------------------------------------------------------------
+if not DEBUG:
+    if SECRET_KEY == _INSECURE_DEV_SECRET:
+        raise RuntimeError(
+            "Refusing to start: SECRET_KEY is still the insecure "
+            "development default while DEBUG=False. Generate one with:\n"
+            "  python -c \"from django.core.management.utils import "
+            "get_random_secret_key; print(get_random_secret_key())\"\n"
+            "and set SECRET_KEY in the environment/.env."
+        )
+    _prod_hosts = [h for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1')]
+    if not _prod_hosts:
+        raise RuntimeError(
+            "Refusing to start: ALLOWED_HOSTS only contains localhost "
+            "while DEBUG=False. Set ALLOWED_HOSTS to your public "
+            "domain(s), e.g. 'luminarecs.com,www.luminarecs.com'."
+        )
+    _wildcards = [h for h in _prod_hosts if h.startswith('*') or h.startswith('.')]
+    if _wildcards:
+        raise RuntimeError(
+            "Refusing to start: ALLOWED_HOSTS contains wildcard/pattern "
+            f"entries in production ({', '.join(_wildcards)}). Wildcards "
+            "let attacker-controlled subdomains pass Host-header checks. "
+            "List exact domains instead."
+        )
 
 
 # Application definition
@@ -77,6 +111,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Serve static from a single container
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -173,6 +208,15 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
 CSRF_TRUSTED_ORIGINS = os.getenv(
     'CSRF_TRUSTED_ORIGINS',
     'http://127.0.0.1:8000,http://localhost:8000,https://elke-unelongated-lorna.ngrok-free.dev'
@@ -230,6 +274,34 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True').lower() == 'true'
     SECURE_HSTS_PRELOAD = os.getenv('SECURE_HSTS_PRELOAD', 'True').lower() == 'true'
 
+    # Behind Caddy/Cloudflare: trust the proxy's scheme header so Django
+    # knows the original request was HTTPS (needed for correct redirects).
+    # Only trusted when it comes from our own internal Docker network.
+    if os.getenv('TRUST_PROXY', 'False').lower() == 'true':
+        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # ------------------------------------------------------------------
+    # HARDENED PRODUCTION DEFAULTS
+    # ------------------------------------------------------------------
+    # Cookies are unreadable by JavaScript (XSS can't steal sessions) and
+    # framing is fully denied (clickjacking defense-in-depth on top of CSP
+    # frame-ancestors set by SecurityHeadersMiddleware).
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = os.getenv('CSRF_COOKIE_HTTPONLY', 'True').lower() == 'true'
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+
+    # Sessions expire after 14 days; rolling expiry refreshes daily use.
+    SESSION_COOKIE_AGE = int(os.getenv('SESSION_COOKIE_AGE', str(60 * 60 * 24 * 14)))
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+    # Upload caps (bytes): slow brute-force/memory attacks via huge posts.
+    DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('DATA_UPLOAD_MAX_MEMORY_SIZE', str(10 * 1024 * 1024)))
+    FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('FILE_UPLOAD_MAX_MEMORY_SIZE', str(10 * 1024 * 1024)))
+    DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+
 LOGIN_URL = "login"
 
 LOGIN_REDIRECT_URL = "homepage"
@@ -285,6 +357,14 @@ DEFAULT_FROM_EMAIL = os.getenv(
     'DEFAULT_FROM_EMAIL',
     'LuminaRecs <noreply@luminarecs.com>'
 )
+
+# Fixed public base used for password-reset links in emails. When set, the
+# emailed reset link always points here regardless of which host the user
+# opened /forgot-password/ from (otherwise it uses the request's own host,
+# which can be an unreachable localhost/ngrok URL). Leave empty to keep
+# default behaviour (use the request host).
+PASSWORD_RESET_LINK_DOMAIN = os.getenv('PASSWORD_RESET_LINK_DOMAIN', '').strip()
+PASSWORD_RESET_LINK_PROTOCOL = os.getenv('PASSWORD_RESET_LINK_PROTOCOL', 'https').strip()
 
 #=========================
 # REDIS CACHE (falls back to in-memory during tests)

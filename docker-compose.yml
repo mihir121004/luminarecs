@@ -1,0 +1,132 @@
+# ==========================================================================
+# PRODUCTION TOPOLOGY — protected by design
+#
+#   internet ──> caddy (only container with 80/443; auto-HTTPS)
+#                  │ frontend network
+#                  ▼
+#                web (Django/gunicorn, NON-root) ── backend network ──> db / redis
+#
+#  * MySQL and Redis have NO published ports — they are unreachable from
+#    the host and the internet; only containers on the backend network
+#    can talk to them.
+#  * The web container publishes nothing either; every request must pass
+#    through Caddy's TLS termination.
+#  * All services run with no-new-privileges and memory caps.
+# ==========================================================================
+services:
+  # ------------------------------------------------------------------ edge
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"     # ACME HTTP-01 challenge + redirect to HTTPS
+      - "443:443"   # TLS terminated here
+    environment:
+      DOMAIN: "${DOMAIN:?Set DOMAIN in .env, e.g. luminarecs.com}"
+      ACME_EMAIL: ${ACME_EMAIL:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data       # certificates & keys persist across restarts
+      - caddy_config:/config
+    networks: [frontend]
+    depends_on: [web]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+
+  # ------------------------------------------------------------------- app
+  web:
+    build: .
+    restart: unless-stopped
+    # NOTE: intentionally NO ports section — the app is never exposed
+    # directly; all traffic arrives via the caddy reverse proxy.
+    expose: ["8000"]
+    environment:
+      DJANGO_SETTINGS_MODULE: core.settings
+      SECRET_KEY: "${SECRET_KEY:?Generate one with: python -c import secrets; print(secrets.token_urlsafe(48))}"
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:?Set ALLOWED_HOSTS in .env}"
+      TRUST_PROXY: "True"
+      FORWARDED_ALLOW_IPS: "172.16.0.0/12"
+      DB_ENGINE: django.db.backends.mysql
+      DB_NAME: ${DB_NAME:-luminarecs_db}
+      DB_USER: ${DB_USER:-luminarecs}
+      DB_PASSWORD: "${DB_PASSWORD:?Set DB_PASSWORD in .env}"
+      DB_HOST: db
+      DB_PORT: "3306"
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/1
+      CACHE_TTL: ${CACHE_TTL:-3600}
+      EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-LuminaRecs <noreply@luminarecs.com>}
+      PASSWORD_RESET_LINK_DOMAIN: ${PASSWORD_RESET_LINK_DOMAIN:-${DOMAIN}}
+      PASSWORD_RESET_LINK_PROTOCOL: https
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-https://${DOMAIN},https://www.${DOMAIN}}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - media_data:/app/media   # user uploads survive redeploys
+    networks: [frontend, backend]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    security_opt: [no-new-privileges:true]
+    mem_limit: 3g          # headroom for torch/faiss model loads
+    tmpfs:
+      - /dev/shm:size=256m
+
+  # ------------------------------------------------------------- database
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    # No ports published: reachable ONLY from the backend network.
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-luminarecs_db}
+      MYSQL_USER: ${DB_USER:-luminarecs}
+      MYSQL_PASSWORD: "${DB_PASSWORD:?Set DB_PASSWORD in .env}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}"
+    command:
+      - --host-cache-size=0                 # don't cache/resolve client hosts
+      - --skip-name-resolve
+      - --max_connections=100
+    volumes:
+      - db_data:/var/lib/mysql
+    networks: [backend]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------- cache
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # No ports published: reachable ONLY from the backend network.
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-changeme}", "--maxmemory", "200mb", "--maxmemory-policy", "allkeys-lru"]
+    networks: [backend]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$REDIS_PASSWORD\" ping | grep PONG"]
+      environment:
+        REDIS_PASSWORD: ${REDIS_PASSWORD:-changeme}
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  frontend: {}   # caddy <-> web only
+  backend:  {}   # web <-> db/redis only
+
+volumes:
+  db_data:
+  media_data:
+  caddy_data:
+  caddy_config:

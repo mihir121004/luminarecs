@@ -2,8 +2,21 @@ from django.urls import path
 from django.views.generic import RedirectView
 from django.templatetags.static import static as static_url
 
+from django.conf import settings
 from django.contrib.auth import views as auth_views
 from . import views
+
+
+# When a fixed reset-link domain is configured, pass it (and the protocol)
+# into the email context so the reset link in the email is always reachable
+# regardless of which host the user submitted /forgot-password/ from.
+def _password_reset_email_context():
+    if settings.PASSWORD_RESET_LINK_DOMAIN:
+        return {
+            "domain": settings.PASSWORD_RESET_LINK_DOMAIN,
+            "protocol": settings.PASSWORD_RESET_LINK_PROTOCOL or "https",
+        }
+    return None
 
 urlpatterns = [
     # Legacy favicon paths browsers auto-request -> serve the brand SVG.
@@ -82,6 +95,7 @@ urlpatterns = [
             email_template_name="emails/password_reset_email.html",
             subject_template_name="emails/password_reset_subject.txt",
             success_url="/forgot-password/done/",
+            extra_email_context=_password_reset_email_context(),
         ),
         name="password_reset",
     ),

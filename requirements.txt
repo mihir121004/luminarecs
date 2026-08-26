@@ -72,3 +72,7 @@ wcwidth==0.8.2
 Werkzeug==3.1.8
 pyOpenSSL==26.4.0
 social-auth-app-django==5.5.1
+
+# Production web serving & static files
+gunicorn==23.0.0
+whitenoise==6.6.0

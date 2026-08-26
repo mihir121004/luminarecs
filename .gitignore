@@ -32,3 +32,6 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+
+# Local dev tools (MailHog binary downloaded by scripts/mailhog.sh)
+scripts/.bin/

@@ -41,6 +41,21 @@ python manage.py runserver      # http://localhost:8000
 | `/homepage/` | Personalized movie feed |
 | `/analytics/` | Staff-only analytics dashboard |
 
+## Local email (password reset, account emails)
+
+By default the app sends email to a local **MailHog** catcher so you can view
+reset/forgotten-password emails without configuring real SMTP credentials.
+
+```bash
+./scripts/mailhog.sh                 # start MailHog (downloads binary on first run)
+```
+
+- View captured emails at **http://127.0.0.1:8025**
+- The app's SMTP backend points at `127.0.0.1:1025` (see `.env` → Email Configuration)
+
+After changing `.env` restart the dev server. For real delivery, fill in a
+provider's SMTP credentials in `.env` (see the commented Gmail example there).
+
 ## Documentation
 
 See [`docs/`](docs/) — start with `ARCHITECTURE.md`, then
