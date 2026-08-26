@@ -850,7 +850,8 @@ LuminaRecs • Cinematic Profile
       </a>
     </div>
 
-    <video autoplay muted loop playsinline class="profile-video">
+    <video poster="{% static 'images/wishlist-poster.jpg' %}" autoplay muted loop playsinline class="profile-video">
+      <source src="{% static 'videos/wishlist-portrait.mp4' %}" media="(max-width: 768px)" type="video/mp4" />
       <source src="{% static 'videos/wishlist.mp4' %}" type="video/mp4">
     </video>
 
@@ -1355,3 +1356,10 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 {% endblock %}
+
+    <script>
+      /* Respect reduced-motion: freeze backgrounds on their poster frame. */
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.querySelectorAll("video").forEach((v) => v.removeAttribute("autoplay"));
+      }
+    </script>

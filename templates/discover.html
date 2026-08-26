@@ -449,7 +449,8 @@ LuminaRecs {% endblock %} {% block extra_css %}
 {% endblock %} {% block content %}
 
 <section class="discover-hero">
-  <video class="discover-video" autoplay muted loop playsinline>
+  <video poster="{% static 'images/discover-poster.jpg' %}" class="discover-video" autoplay muted loop playsinline>
+    <source src="{% static 'videos/discover-portrait.mp4' %}" media="(max-width: 768px)" type="video/mp4" />
     <source src="{% static 'videos/discover.mp4' %}" type="video/mp4" />
   </video>
 
@@ -642,3 +643,10 @@ LuminaRecs {% endblock %} {% block extra_css %}
 </section>
 
 {% endblock %}
+
+    <script>
+      /* Respect reduced-motion: freeze backgrounds on their poster frame. */
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.querySelectorAll("video").forEach((v) => v.removeAttribute("autoplay"));
+      }
+    </script>

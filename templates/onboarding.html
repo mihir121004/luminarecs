@@ -375,7 +375,8 @@
     <div class="projector"></div>
 
     <div class="bg">
-      <video autoplay muted loop playsinline>
+      <video poster="{% static 'images/cinema-intro-poster.jpg' %}" autoplay muted loop playsinline>
+        <source src="{% static 'videos/cinema-intro-portrait.mp4' %}" media="(max-width: 768px)" type="video/mp4" />
         <source src="{% static 'videos/cinema-intro.mp4' %}" type="video/mp4" />
       </video>
     </div>
@@ -427,5 +428,11 @@
         </div>
       </div>
     </div>
-  </body>
+      <script>
+      /* Respect reduced-motion: freeze backgrounds on their poster frame. */
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.querySelectorAll("video").forEach((v) => v.removeAttribute("autoplay"));
+      }
+    </script>
+</body>
 </html>

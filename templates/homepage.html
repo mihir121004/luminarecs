@@ -683,7 +683,8 @@
 {% endblock %} {% block content %}
 <div class="homepage-wrapper">
   <section class="home-hero">
-    <video class="home-hero-video" autoplay muted loop playsinline>
+    <video poster="{% static 'images/homepage-poster.jpg' %}" class="home-hero-video" autoplay muted loop playsinline>
+      <source src="{% static 'videos/homepage-portrait.mp4' %}" media="(max-width: 768px)" type="video/mp4" />
       <source src="{% static 'videos/homepage.mp4' %}" type="video/mp4" />
     </video>
 
@@ -1056,3 +1057,10 @@
   </section>
 </div>
 {% endblock %}
+
+    <script>
+      /* Respect reduced-motion: freeze backgrounds on their poster frame. */
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.querySelectorAll("video").forEach((v) => v.removeAttribute("autoplay"));
+      }
+    </script>
