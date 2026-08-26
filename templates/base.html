@@ -965,10 +965,18 @@
                 flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
+                left: 0;
+                right: 0;      /* anchor both edges: width spans exactly the viewport */
+                width: auto;   /* never exceeds the screen */
               }
 
               .logo {
                 font-size: 1.4rem;
+                min-width: 0;                          /* allow shrink instead of pushing */
+                flex-shrink: 1;                        /* collapse the logo before the button */
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;               /* long brand text truncates, never overflows */
               }
               .menu-toggle{
                 position: relative;
@@ -981,6 +989,8 @@
                 border: 1px solid rgba(195, 155, 52, .4);
                 border-radius: 12px;
                 background: rgba(6, 9, 20, .85);
+                flex-shrink: 0;                        /* never crush the tap target */
+                margin-left: auto;                     /* pin to the right INSIDE the container */
               }
               .menu-toggle:hover{
                 border-color: var(--prestige-gold);
