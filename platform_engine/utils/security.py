@@ -3,6 +3,7 @@ Security middleware and utilities for production-ready security
 """
 
 import logging
+import secrets
 from typing import Optional
 from django.http import HttpRequest, HttpResponse
 from django.utils.decorators import decorator_from_middleware
@@ -14,28 +15,28 @@ logger = logging.getLogger(__name__)
 
 
 class SecurityHeadersMiddleware:
-    """Add security headers to all responses"""
-    
+    """Add security headers to all responses, including CSP nonces"""
+
     def __init__(self, get_response):
         self.get_response = get_response
-    
+
     def __call__(self, request: HttpRequest) -> HttpResponse:
         response = self.get_response(request)
-        
+
         # Only add security headers in production
         if not settings.DEBUG:
             # Clickjacking protection
             response['X-Frame-Options'] = 'SAMEORIGIN'
-            
+
             # MIME type sniffing protection
             response['X-Content-Type-Options'] = 'nosniff'
-            
+
             # XSS protection (legacy, but still useful)
             response['X-XSS-Protection'] = '1; mode=block'
-            
+
             # Referrer policy
             response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-            
+
             # Permissions policy (replaces Feature-Policy)
             response['Permissions-Policy'] = (
                 'geolocation=(), '
@@ -43,18 +44,25 @@ class SecurityHeadersMiddleware:
                 'camera=(), '
                 'payment=()'
             )
-            
-            # Content Security Policy
+
+            # Generate a fresh CSP nonce and attach it so templates
+            # can use {% nonce %} or the built-in {% csp_nonce "script" %}.
+            nonce = secrets.token_hex(16)
+            response['X-CSP-Nonce'] = nonce
+            request.csp_nonce = nonce
+
+            # Content Security Policy with nonce support (replaces unsafe-inline)
             response['Content-Security-Policy'] = (
                 "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline'; "
-                "style-src 'self' 'unsafe-inline'; "
+                f"script-src 'self' 'nonce-{nonce}'; "
+                f"style-src 'self' 'nonce-{nonce}'; "
                 "img-src 'self' data: https:; "
                 "font-src 'self' data:; "
                 "connect-src 'self' https:; "
-                "frame-ancestors 'self'"
+                "frame-ancestors 'self'; "
+                "upgrade-insecure-requests"
             )
-        
+
         return response
 
 
