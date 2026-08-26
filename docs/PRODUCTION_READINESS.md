@@ -16,23 +16,23 @@ LuminaRecs has been transformed from a development project to a **production-rea
 - **What was done**:
   - Moved all hardcoded secrets to environment variables (SECRET_KEY, DB_PASSWORD, etc.)
   - Created `.env.example` template with all required variables
-  - Created `.env.development` for local development
+  - Environment configuration lives in a single gitignored `.env`
   - Production configuration lives in `core/settings.py` via environment variables
   - Updated `core/settings.py` to load environment variables via `python-dotenv`
 
 - **Files created/modified**:
   - `.env.example` - Template with all environment variables
-  - `.env.development` - Development environment configuration
+  - `.env` - Active configuration (copied from `.env.example`)
   - `core/settings.py` - production behaviour selected through environment variables
   - `core/settings.py` - Updated to use environment variables
 
 - **How to use**:
   ```bash
   # For development
-  cp .env.development .env
+  cp .env.example .env   # then fill in real values
   
   # For production
-  cp .env.example .env.production
+  cp .env.example .env   # production values go in .env
   # Edit .env.production with production values
   ```
 
@@ -356,7 +356,7 @@ LuminaRecs has been transformed from a development project to a **production-rea
 
 ### Configuration
 1. `.env.example` - Environment variables template
-2. `.env.development` - Development configuration
+2. `.env` - Active configuration (never committed)
 3. `core/settings.py` - single settings module (env-driven)
 4. `DEPLOYMENT_GUIDE.md` - Deployment instructions
 
@@ -407,7 +407,7 @@ pip install -r requirements.txt
 ### 2. Configure Environment
 ```bash
 # Copy environment template
-cp .env.example .env.production
+cp .env.example .env   # production values go in .env
 
 # Edit with production values
 nano .env.production

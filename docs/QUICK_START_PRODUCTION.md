@@ -10,7 +10,7 @@ This guide helps you understand and use the new production-ready features added 
 
 ```bash
 # Copy development environment file
-cp .env.development .env
+cp .env.example .env   # then fill in real values
 
 # The following defaults are pre-configured:
 # - DEBUG=True (development mode)

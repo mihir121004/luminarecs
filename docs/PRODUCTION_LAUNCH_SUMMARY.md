@@ -31,7 +31,7 @@ Your LuminaRecs application has been comprehensively transformed from a developm
 ### 📄 Configuration Files
 ```
 ✅ .env.example              - Production environment template
-✅ .env.development          - Development environment
+✅ .env (+ .env.example)    - Environment config (gitignored / template)
 ✅ core/settings.py - single env-driven settings module
 ```
 
@@ -68,7 +68,7 @@ Your LuminaRecs application has been comprehensively transformed from a developm
 ## Key Features Implemented
 
 ### 1️⃣ Environment Variable Management ✅
-- **Files**: `.env.example`, `.env.development`, `core/settings.py`
+- **Files**: `.env.example`, `.env`, `core/settings.py`
 - **Features**:
   - SECRET_KEY moved to environment
   - Database credentials secured
