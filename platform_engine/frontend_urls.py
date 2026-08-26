@@ -1,8 +1,25 @@
 from django.urls import path
+from django.views.generic import RedirectView
+from django.templatetags.static import static as static_url
+
 from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
+    # Legacy favicon paths browsers auto-request -> serve the brand SVG.
+    # Stops the recurring 404 noise in logs.
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url=static_url("images/favicon.svg"), permanent=True),
+    ),
+    path(
+        "apple-touch-icon.png",
+        RedirectView.as_view(url=static_url("images/favicon.svg"), permanent=True),
+    ),
+    path(
+        "apple-touch-icon-precomposed.png",
+        RedirectView.as_view(url=static_url("images/favicon.svg"), permanent=True),
+    ),
 
     path("", views.lockscreen, name="lockscreen"),
     path("landing/", views.landing, name="landing"),
