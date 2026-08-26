@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+
+{% block title %}Recommended For You · LuminaRecs{% endblock %}
+{% block content %}
+
+
+<section class="section">
+
+
+<h1>
+AI Recommendations
+</h1>
+
+
+<div class="grid">
+
+
+{% for item in recommendations %}
+
+
+<div class="movie-card">
+
+
+<img src="{{item.movie.poster_url}}">
+
+
+<h3>
+{{item.movie.title}}
+</h3>
+
+
+<h4>
+AI Match:
+{{item.score}}%
+</h4>
+
+
+<div>
+
+{% for reason in item.reason %}
+
+<p>
+✓ {{reason}}
+</p>
+
+
+{% endfor %}
+
+
+</div>
+
+
+</div>
+
+
+
+{% endfor %}
+
+
+</div>
+
+
+</section>
+
+
+{% endblock %}

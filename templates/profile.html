@@ -1,0 +1,1357 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+LuminaRecs • Cinematic Profile
+{% endblock %}
+
+{% block extra_css %}
+<style>
+
+/* =====================================================
+   LUMINARECS PROFILE V10
+===================================================== */
+
+:root {
+  --gold: #c39b34;
+  --gold-light: #e6c15a;
+  --cinema-black: #020307;
+  --film: #060914;
+  --muted: #9ca3af;
+  --border: rgba(255, 255, 255, 0.08);
+}
+
+/* =====================================================
+   PAGE
+===================================================== */
+
+.profile-page-wrapper {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(195, 155, 52, 0.08), transparent 40%),
+    var(--cinema-black);
+  color: white;
+  overflow: hidden;
+  padding-top: 90px;
+}
+
+.profile-page-wrapper * {
+  box-sizing: border-box;
+}
+
+/* =====================================================
+   FILM GRAIN
+===================================================== */
+
+.profile-page-wrapper::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* =====================================================
+   BACK BUTTON
+===================================================== */
+
+.profile-back {
+  position: absolute;
+  top: 115px;
+  left: 50px;
+  z-index: 20;
+}
+
+.profile-back a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: 14px;
+  background: rgba(6, 9, 20, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(195, 155, 52, 0.35);
+  text-decoration: none;
+  color: white;
+  transition: 0.4s;
+}
+
+.profile-back a:hover {
+  background: var(--gold);
+  color: black;
+  transform: translateX(-6px);
+}
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.profile-hero {
+  min-height: calc(100vh - 90px);
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 80px 70px 120px;
+}
+
+/* =====================================================
+   VIDEO
+===================================================== */
+
+.profile-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -5;
+  filter: brightness(0.18) contrast(1.3) saturate(1.2);
+}
+
+/* =====================================================
+   OVERLAY
+===================================================== */
+
+.profile-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -4;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 3, 7, 0.55),
+    rgba(2, 3, 7, 0.98)
+  );
+}
+
+/* =====================================================
+   GLOW
+===================================================== */
+
+.profile-glow {
+  position: absolute;
+  inset: -20%;
+  z-index: -3;
+  background: radial-gradient(
+    circle,
+    rgba(195, 155, 52, 0.18),
+    transparent 45%
+  );
+  animation: pulseGlow 8s infinite;
+}
+
+@keyframes pulseGlow {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+}
+
+/* =====================================================
+   PARTICLES
+===================================================== */
+
+.profile-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: -2;
+}
+
+.profile-particles span {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.35;
+  animation: floatParticle 12s infinite;
+}
+
+.profile-particles span:nth-child(1) {
+  left: 20%;
+  top: 40%;
+}
+
+.profile-particles span:nth-child(2) {
+  left: 70%;
+  top: 20%;
+  animation-delay: 3s;
+}
+
+.profile-particles span:nth-child(3) {
+  left: 85%;
+  top: 60%;
+  animation-delay: 5s;
+}
+
+.profile-particles span:nth-child(4) {
+  left: 40%;
+  top: 80%;
+  animation-delay: 7s;
+}
+
+@keyframes floatParticle {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-120px);
+    opacity: 0;
+  }
+}
+
+/* =====================================================
+   MAIN CONTAINER
+===================================================== */
+
+.profile-container {
+  width: 100%;
+  max-width: 1450px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+/* =====================================================
+   PROFILE CARD
+===================================================== */
+
+.profile-card {
+  position: relative;
+  padding: 45px;
+  text-align: center;
+  border-radius: 28px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(6, 9, 20, 0.85)
+  );
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+.profile-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+}
+
+/* =====================================================
+   AVATAR
+===================================================== */
+
+.avatar {
+  width: 200px;
+  height: 200px;
+  margin: auto auto 30px;
+  border-radius: 50%;
+  padding: 5px;
+  background: linear-gradient(
+    45deg,
+    var(--gold),
+    transparent,
+    var(--gold-light)
+  );
+  animation: avatarGlow 5s infinite;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #020307;
+}
+
+@keyframes avatarGlow {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(195, 155, 52, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(195, 155, 52, 0.65);
+  }
+}
+
+/* =====================================================
+   MOVIE CARDS
+===================================================== */
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.movie-card {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(6, 9, 20, 0.9)
+  );
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: 0.4s;
+}
+
+.movie-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(195, 155, 52, 0.25);
+  border-color: #c39b34;
+}
+
+.movie-card img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.movie-card h3 {
+  padding: 15px 10px 5px;
+  font-family: "Cinzel", serif;
+  margin: 0;
+  color: white;
+  font-size: 1rem;
+}
+
+.movie-card p {
+  padding: 0 10px 15px;
+  color: #b8c0cc;
+  font-size: 0.85rem;
+}
+
+/* =====================================================
+   PROFILE INFO
+===================================================== */
+
+.profile-tag {
+  font-size: 11px;
+  letter-spacing: 0.5em;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+
+.profile-name {
+  font-family: "Cinzel", serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  margin-bottom: 15px;
+}
+
+.profile-desc {
+  color: #b8c0cc;
+  line-height: 1.8;
+}
+
+.member-box {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(195, 155, 52, 0.25);
+}
+
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 20px;
+  padding: 12px 25px;
+  border-radius: 40px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  color: #020307;
+  font-weight: 700;
+}
+
+/* =====================================================
+   PROFILE PROGRESS
+===================================================== */
+
+.progress-title {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: #b8c0cc;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 30px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  min-width: 5%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transition: width 1s ease;
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.profile-btn {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: white;
+  border: 1px solid rgba(195, 155, 52, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  transition: 0.4s;
+  cursor: pointer;
+}
+
+.profile-btn:hover {
+  background: var(--gold);
+  color: black;
+}
+
+/* =====================================================
+   HERO CONTENT
+===================================================== */
+
+.hero-tag {
+  font-size: 11px;
+  letter-spacing: 0.5em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-family: "Cinzel", serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 25px;
+  line-height: 1.2;
+}
+
+.hero-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #b8c0cc;
+  margin-bottom: 40px;
+  max-width: 600px;
+}
+
+.hero-description strong {
+  color: var(--gold);
+}
+
+/* =====================================================
+   AI WRAPPER
+===================================================== */
+
+.ai-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 40px;
+}
+
+/* =====================================================
+   SCORE RING
+===================================================== */
+
+.score-ring {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--gold) 0deg,
+    var(--gold) calc(var(--progress, 75) * 3.6deg),
+    rgba(255, 255, 255, 0.1) calc(var(--progress, 75) * 3.6deg)
+  );
+  box-shadow: 0 0 40px rgba(195, 155, 52, 0.3);
+}
+
+.score-content {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: rgba(6, 9, 20, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-content h2 {
+  font-size: 4rem;
+  color: var(--gold);
+  margin: 0;
+}
+
+.score-content span {
+  color: #b8c0cc;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+
+/* =====================================================
+   AI PANEL
+===================================================== */
+
+.ai-panel {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(6, 9, 20, 0.85)
+  );
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ai-panel h3 {
+  font-size: 1.3rem;
+  color: var(--gold);
+  margin-bottom: 15px;
+  margin-top: 0;
+}
+
+.ai-panel p {
+  color: #b8c0cc;
+  margin-bottom: 10px;
+}
+
+.ai-panel p strong {
+  color: white;
+}
+
+.ai-personality {
+  font-family: "Cinzel", serif;
+  font-size: 1.8rem;
+  color: var(--gold-light);
+  margin: 15px 0;
+}
+
+/* =====================================================
+   GENRE BADGES
+===================================================== */
+
+.genre-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.taste-badge {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 30px;
+  background: rgba(195, 155, 52, 0.15);
+  border: 1px solid rgba(195, 155, 52, 0.4);
+  color: var(--gold-light);
+  font-size: 0.9rem;
+  transition: 0.3s;
+}
+
+.taste-badge:hover {
+  background: rgba(195, 155, 52, 0.3);
+  transform: translateY(-2px);
+}
+
+/* =====================================================
+   PROFILE SECTIONS
+===================================================== */
+
+.profile-section {
+  max-width: 1450px;
+  margin: 60px auto;
+  padding: 0 70px;
+}
+
+.ai-radar-box {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(6, 9, 20, 0.85)
+  );
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+}
+
+.ai-radar-title {
+  font-size: 1.4rem;
+  color: var(--gold);
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* =====================================================
+   EDIT PROFILE MODAL
+===================================================== */
+
+.edit-profile-modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.edit-profile-modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-profile-box {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(6, 9, 20, 0.95)
+  );
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 45px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: var(--gold);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.close-modal:hover {
+  color: var(--gold-light);
+}
+
+.edit-profile-box h2 {
+  color: var(--gold);
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #b8c0cc;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(195, 155, 52, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.save-profile-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border: none;
+  color: black;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 20px;
+}
+
+.save-profile-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(195, 155, 52, 0.4);
+}
+
+@media (max-width: 1100px){
+  .profile-container{
+    grid-template-columns: 1fr;
+    gap: 50px;
+  }
+  .profile-card{
+    max-width: 550px;
+    margin: auto;
+  }
+  .ai-wrapper{
+    grid-template-columns: 1fr;
+  }
+  .score-ring{
+    margin: auto;
+  }
+}
+
+@media (max-width: 900px){
+  .ai-wrapper{
+    grid-template-columns: 1fr;
+
+  }
+  .score-ring{
+    margin: auto;
+  }
+}
+
+@media (max-width: 768px){
+  .profile-card{
+    padding: 30px;
+  }
+  .profile-back{
+    left: 15px;
+    top: 60px;
+  }
+  .member-box{
+    margin-top: 12px;
+    padding: 14px;
+  }
+  .profile-back a{
+    padding: 10px 18px;
+    font-size: .85rem;
+  }
+  .profile-hero{
+    padding: 120px 20px 60px;
+  }
+  .hero-title{
+    font-size: 2.3rem;
+  }
+  .profile-name{
+    font-size: 2rem;
+  }
+  .avatar{
+    width: 130px;
+    height: 130px;
+    margin-bottom: 20px;
+  }
+  .profile-section{
+    padding: 0 20px;
+  }
+  .score-ring{
+    width: 220px;
+    height: 220px;
+  }
+  .score-content{
+    width: 190px;
+    height: 190px;
+  }
+  .score-content h2{
+    font-size: 3rem;
+  }
+  .movie-grid{
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px){
+  .movie-grid{
+    grid-template-columns: 1fr;
+  }
+  .hero-title{
+    font-size: 1.9rem;
+  }
+  .hero-description{
+    font-size: .95rem;
+  }
+  .profile-card{
+    padding: 25px;
+  }
+  .ai-panel{
+    padding: 25px;
+  }
+  .edit-profile-box{
+    padding: 25px;
+  }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="profile-page-wrapper">
+
+  <section class="profile-hero">
+
+    <div class="profile-back">
+      <a href="javascript:history.back()">
+        ← Back
+      </a>
+    </div>
+
+    <video autoplay muted loop playsinline class="profile-video">
+      <source src="{% static 'videos/wishlist.mp4' %}" type="video/mp4">
+    </video>
+
+    <div class="profile-overlay"></div>
+    <div class="profile-glow"></div>
+
+    <div class="profile-particles">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <div class="profile-container">
+
+      <div class="profile-card">
+
+        <div class="avatar">
+          {% if avatar_url %}
+          <img src="{{ avatar_url }}" alt="Profile">
+          {% else %}
+          <img src="{% static 'images/default-avatar.svg' %}" alt="Profile">
+          {% endif %}
+        </div>
+
+        <div class="profile-tag">
+          LUMINARECS MEMBER
+        </div>
+
+        <h2 class="profile-name">
+          {{ user.get_full_name|default:user.username }}
+        </h2>
+
+        {% if profile.bio %}
+        <p class="profile-desc">
+          {{ profile.bio }}
+        </p>
+        {% else %}
+        <p class="profile-desc">
+          Movie Explorer •
+          {% if favorite_genres %}
+          {{ favorite_genres.0.name }}
+          {% else %}
+          Cinema Enthusiast
+          {% endif %}
+        </p>
+        {% endif %}
+
+        <div class="member-box">
+          🎬 Member Since
+          <br>
+          {{ user.date_joined|date:"F Y" }}
+        </div>
+
+        <div class="premium-badge">
+          ⭐ {{ preferred_experience|default:"Cinema Experience" }}
+        </div>
+
+        <div class="profile-progress">
+          <div class="progress-title">
+            <span>Profile Completion</span>
+            <strong>{{ profile_completion }}%</strong>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" data-progress="{{ profile_completion }}"></div>
+          </div>
+        </div>
+
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="profile-btn">Logout</button>
+        </form>
+
+        <a href="#" id="openEditProfile" class="profile-btn">
+          ✏️ Edit Profile
+        </a>
+
+        <a href="{% url 'change_password' %}" class="profile-btn">
+          🔐 Change Password
+        </a>
+
+      </div>
+
+      <div class="hero-content">
+
+        <div class="hero-tag">
+          CINEMATIC PROFILE
+        </div>
+
+        <h1 class="hero-title">
+          Welcome Back, {{ user.first_name|default:user.username }}
+        </h1>
+
+        <p class="hero-description">
+          You have watched
+          <strong>{{ movies_watched }}</strong>
+          movies and built a unique cinematic identity.
+          LuminaRecs AI currently classifies you as
+          <strong>{{ movie_personality }}</strong>
+          with a taste score of
+          <strong>{{ taste_score }}%</strong>.
+        </p>
+
+        <div class="ai-wrapper">
+
+          <div class="score-ring" style="--progress: {{ taste_score }}">
+            <div class="score-content">
+              <h2 id="tasteScore">
+                {{ taste_score|default:"0" }}%
+              </h2>
+              <span>
+                Taste Score
+              </span>
+            </div>
+          </div>
+
+          <div class="ai-panel">
+
+            <h3>
+              🎭 LuminaRecs AI Personality
+            </h3>
+
+            <p>
+              Your cinematic personality is:
+            </p>
+
+            <h2 class="ai-personality">
+              {{ movie_personality|default:"The Visionary Explorer" }}
+            </h2>
+
+            <p>
+              Watching Style:
+              <strong>
+                {{ watching_style|default:"Balanced Viewer" }}
+              </strong>
+            </p>
+
+            <p>
+              Preferred Experience:
+              <strong>
+                {{ preferred_experience|default:"Cinema Experience" }}
+              </strong>
+            </p>
+
+            <hr style="margin: 20px 0; opacity: .15;">
+
+            <h3>
+              Favorite Genres
+            </h3>
+
+            <div class="genre-badges">
+              {% if favorite_genres %}
+              {% for genre in favorite_genres %}
+              <span class="taste-badge">
+                {{ genre.name }}
+                ({{ genre.movies }} movies)
+              </span>
+              {% endfor %}
+              {% else %}
+              <span class="taste-badge">
+                Start watching movies to build your AI profile.
+              </span>
+              {% endif %}
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- Continue Watching -->
+  <section class="profile-section">
+    <div class="ai-radar-box">
+      <h3 class="ai-radar-title">
+        ▶️ Continue Watching
+      </h3>
+
+      {% if continue_watching %}
+      <div class="movie-grid">
+        {% for item in continue_watching %}
+        <div class="movie-card">
+          <img src="https://image.tmdb.org/t/p/w500{{ item.movie.poster_url }}" alt="{{ item.movie.title }}" />
+          <h3>{{ item.movie.title }}</h3>
+          <p>{{ item.movie.genres }}</p>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="genre-badges">
+        <span class="taste-badge">
+          No Movies In Progress
+        </span>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Recently Watched -->
+  <section class="profile-section">
+    <div class="ai-radar-box">
+      <h3 class="ai-radar-title">
+        🎬 Recently Watched
+      </h3>
+
+      {% if watch_history %}
+      <div class="movie-grid">
+        {% for item in watch_history %}
+        <div class="movie-card">
+          <img src="https://image.tmdb.org/t/p/w500{{ item.movie.poster_url }}" alt="{{ item.movie.title }}" />
+          <h3>{{ item.movie.title }}</h3>
+          <p>Watched: {{ item.watched_at|date:"d M Y" }}</p>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="genre-badges">
+        <span class="taste-badge">
+          No Watch History
+        </span>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Statistics -->
+  <section class="profile-section">
+    <div class="ai-radar-box">
+      <h3 class="ai-radar-title">
+        📊 Cinema Statistics
+      </h3>
+      <div class="genre-badges">
+        <span class="taste-badge">
+          🎬 Movies Watched: {{ movies_watched }}
+        </span>
+        <span class="taste-badge">
+          ❤️ Wishlist: {{ wishlist_count }}
+        </span>
+        <span class="taste-badge">
+          ⭐ Reviews: {{ reviews_count }}
+        </span>
+        <span class="taste-badge">
+          🤖 Recommendations: {{ recommendations_count }}
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Favorite Actors -->
+  <section class="profile-section">
+    <div class="ai-radar-box">
+      <h3 class="ai-radar-title">
+        🎭 Favorite Actors
+      </h3>
+      <div class="genre-badges">
+        {% if favorite_actors %}
+        {% for actor in favorite_actors %}
+        <span class="taste-badge">
+          {{ actor.name }} • {{ actor.match }}%
+        </span>
+        {% endfor %}
+        {% else %}
+        <span class="taste-badge">
+          Start watching movies to build your AI profile.
+        </span>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Favorite Directors -->
+  <section class="profile-section">
+    <div class="ai-radar-box">
+      <h3 class="ai-radar-title">
+        🎬 Favorite Directors
+      </h3>
+      <div class="genre-badges">
+        {% if favorite_directors %}
+        {% for director in favorite_directors %}
+        <span class="taste-badge">
+          {{ director.name }} • {{ director.match }}%
+        </span>
+        {% endfor %}
+        {% else %}
+        <span class="taste-badge">
+          Start watching movies to build your AI profile.
+        </span>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Activity -->
+  <section class="profile-section">
+    <div class="ai-radar-box">
+      <h3 class="ai-radar-title">
+        🔥 Recent Activity
+      </h3>
+      {% if recent_activities %}
+      {% for activity in recent_activities %}
+      <p style="margin-bottom: 12px; color: #b8c0cc;">
+        {{ activity }}
+      </p>
+      {% endfor %}
+      {% else %}
+      <p style="color: #b8c0cc;">
+        No recent activity available.
+      </p>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- AI Radar Analysis -->
+  <section class="profile-section">
+    <div class="ai-radar-box">
+      <h3 class="ai-radar-title">
+        🎯 AI Taste Analysis
+      </h3>
+      <canvas id="tasteRadar"></canvas>
+    </div>
+  </section>
+
+  <!-- Edit Profile Modal -->
+  <div class="edit-profile-modal" id="editProfileModal">
+    <div class="edit-profile-box">
+      <button class="close-modal" id="closeEditProfile">
+        ✕
+      </button>
+
+      <h2>Edit Profile</h2>
+
+      <form method="POST" action="{% url 'edit_profile' %}">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" name="first_name" value="{{ user.first_name }}">
+        </div>
+
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" name="last_name" value="{{ user.last_name }}">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" value="{{ user.email }}">
+        </div>
+
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea name="bio" rows="4">{{ profile.bio }}</textarea>
+        </div>
+
+        <button type="submit" class="save-profile-btn">
+          Save Changes
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+
+  /* ==========================================
+     PROFILE COMPLETION ANIMATION
+  ========================================== */
+
+  document.querySelectorAll(".progress-fill").forEach((bar) => {
+    const value = bar.dataset.progress || 0;
+    setTimeout(() => {
+      bar.style.width = value + "%";
+    }, 300);
+  });
+
+  /* ==========================================
+     AI SCORE COUNTER
+  ========================================== */
+
+  const scoreElement = document.getElementById("tasteScore");
+
+  if (scoreElement) {
+    let target = parseInt(scoreElement.innerText.replace("%", ""));
+    let current = 0;
+
+    const interval = setInterval(() => {
+      current++;
+      scoreElement.innerText = current + "%";
+
+      if (current >= target) {
+        clearInterval(interval);
+      }
+    }, 20);
+  }
+
+  /* ==========================================
+     EDIT PROFILE MODAL
+  ========================================== */
+
+  const modal = document.getElementById("editProfileModal");
+  const openBtn = document.getElementById("openEditProfile");
+  const closeBtn = document.getElementById("closeEditProfile");
+
+  if (openBtn) {
+    openBtn.onclick = function(e) {
+      e.preventDefault();
+      modal.classList.add("active");
+    };
+  }
+
+  if (closeBtn) {
+    closeBtn.onclick = function() {
+      modal.classList.remove("active");
+    };
+  }
+
+  window.addEventListener("click", function(e) {
+    if (e.target === modal) {
+      modal.classList.remove("active");
+    }
+  });
+
+  /* ==========================================
+     DYNAMIC RADAR CHART
+  ========================================== */
+
+  const radar = document.getElementById("tasteRadar");
+
+  if (radar) {
+    new Chart(radar, {
+      type: "radar",
+      data: {
+        labels: [
+          "Story",
+          "Visual",
+          "Emotion",
+          "Action",
+          "Complexity"
+        ],
+        datasets: [{
+          label: "LuminaRecs AI Analysis",
+          data: [
+            {{ radar_data.story|default:50 }},
+            {{ radar_data.visual|default:50 }},
+            {{ radar_data.emotion|default:50 }},
+            {{ radar_data.action|default:50 }},
+            {{ radar_data.complexity|default:50 }}
+          ],
+          borderWidth: 2,
+          borderColor: "#c39b34",
+          backgroundColor: "rgba(195, 155, 52, 0.25)",
+          pointBackgroundColor: "#e6c15a",
+          pointBorderColor: "#c39b34"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              display: false
+            },
+            grid: {
+              color: "rgba(255, 255, 255, .1)"
+            },
+            angleLines: {
+              color: "rgba(255, 255, 255, .1)"
+            },
+            pointLabels: {
+              color: "#b8c0cc",
+              font: {
+                size: 13
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: "#c39b34"
+            }
+          }
+        }
+      }
+    });
+  }
+
+});
+
+</script>
+
+{% endblock %}

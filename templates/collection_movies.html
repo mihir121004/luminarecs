@@ -1,0 +1,884 @@
+{% extends "base.html" %} {% load static %} {% block title %} {{ title }} •
+LuminaRecs Collections {% endblock %} {% block extra_css %}
+<style>
+  /* =====================================================
+   VARIABLES
+===================================================== */
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  :root {
+    --gold: #c39b34;
+    --gold-light: #e6c15a;
+    --cinema-black: #020307;
+    --glass: rgba(255, 255, 255, 0.04);
+    --border: 1px solid rgba(255, 255, 255, 0.08);
+    --muted: #9ca3af;
+  }
+  main {
+    width: 100%;
+  }
+  /* =====================================================
+   COLLECTION PAGE
+===================================================== */
+
+  .collection-page {
+    min-height: 100vh;
+    background: var(--cinema-black);
+    color: white;
+    padding: 90px 0 70px;
+  }
+
+  /* =====================================================
+   COLLECTION HERO
+===================================================== */
+
+  .collection-hero {
+    position: relative;
+    padding: 140px 24px 70px;
+    width: 100%;
+    background: radial-gradient(
+      circle at top,
+      rgba(195, 155, 52, 0.1),
+      transparent 40%
+    );
+  }
+
+  .collection-back {
+    position: absolute;
+    top: 115px;
+    left: 50px;
+    z-index: 20;
+  }
+
+  .collection-back a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border-radius: 14px;
+    background: rgba(6, 9, 20, 0.75);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(195, 155, 52, 0.35);
+    text-decoration: none;
+    color: white;
+    transition: 0.4s;
+  }
+
+  .collection-back a:hover {
+    background: var(--gold);
+    color: var(--gold);
+    transform: translateX(-6px);
+  }
+
+  .collection-tag {
+    font-size: 11px;
+    letter-spacing: 0.5em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    margin-top: 70px;
+  }
+
+  .collection-title {
+    font-family: "Cinzel", serif;
+    font-size: clamp(2rem, 6vw, 3.8rem);
+    margin-bottom: 25px;
+    line-height: 1.2;
+  }
+
+  .collection-description {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #b8c0cc;
+    max-width: 700px;
+  }
+
+  /* =====================================================
+   SECTION HEADER
+===================================================== */
+
+  .collection-section {
+    width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .section-header {
+    margin-bottom: 50px;
+    text-align: center;
+  }
+
+  .section-title {
+    font-family: "Cinzel", serif;
+    font-size: 2.5rem;
+    color: white;
+    margin-bottom: 15px;
+  }
+
+  .section-subtitle {
+    font-size: 1.1rem;
+    color: #b8c0cc;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* =====================================================
+   STATS
+===================================================== */
+
+  .collection-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    margin-bottom: 60px;
+  }
+
+  .stat-card {
+    background: var(--glass);
+    border: var(--border);
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+  }
+
+  .stat-number {
+    font-family: "Cinzel", serif;
+    font-size: 3rem;
+    color: var(--gold);
+  }
+
+  .stat-label {
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  /* =====================================================
+   MOVIE GRID
+===================================================== */
+
+  .movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+  }
+
+  .movie-card {
+    background: var(--glass);
+    border: var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: 0.45s;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  .movie-card.show {
+    opacity: 1;
+    transform: translateY(0);
+    transition: 0.6s ease;
+  }
+
+  .movie-card:hover {
+    transform: translateY(-12px);
+    border-color: var(--gold);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  }
+
+  .poster {
+    aspect-ratio: 2.1/3;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.5s;
+  }
+
+  .movie-card:hover .poster img {
+    transform: scale(1.08);
+  }
+
+  .poster-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 25px;
+    opacity: 0;
+    transition: 0.4s;
+  }
+
+  .movie-card:hover .poster-overlay {
+    opacity: 1;
+  }
+
+  .view-btn {
+    background: var(--gold);
+    color: black;
+    padding: 12px 25px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .view-btn:hover {
+    transform: scale(1.05);
+  }
+
+  .movie-info {
+    padding: 18px;
+  }
+
+  .movie-title {
+    font-family: "Cinzel", serif;
+    font-size: 1.15rem;
+    white-space: normal;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: 52px;
+    text-overflow: ellipsis;
+  }
+
+  .movie-meta {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 8px;
+  }
+
+  .movie-genres {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    margin-top: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .movie-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(0, 0, 0, 0.75);
+    color: var(--gold);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .ai-match {
+    margin-top: 12px;
+    color: var(--gold-light);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .pagination-container {
+    margin-top: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  .page-btn {
+    padding: 12px 25px;
+
+    border-radius: 12px;
+
+    background: #060914;
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    color: white;
+
+    text-decoration: none;
+
+    transition: 0.3s;
+  }
+
+  .page-btn:hover {
+    background: #c39b34;
+
+    color: black;
+  }
+
+  .page-current {
+    color: #c39b34;
+
+    font-family: "Cinzel", serif;
+
+    font-size: 1.1rem;
+  }
+
+  /* =====================================================
+   AI PANEL
+===================================================== */
+
+  .ai-panel {
+    margin-bottom: 60px;
+    padding: 45px;
+    background: var(--glass);
+    border: var(--border);
+    border-radius: 22px;
+    backdrop-filter: blur(20px);
+  }
+
+  .ai-panel h3 {
+    font-family: "Cinzel", serif;
+    color: var(--gold);
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  .ai-panel p {
+    color: #b8c0cc;
+    line-height: 1.9;
+    margin-bottom: 15px;
+  }
+
+  .ai-panel p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* =====================================================
+   EMPTY STATE
+===================================================== */
+
+  .empty-state {
+    grid-column: 1/-1;
+    padding: 80px 40px;
+    text-align: center;
+    background: var(--glass);
+    border-radius: 20px;
+    border: var(--border);
+  }
+
+  .empty-title {
+    font-family: "Cinzel", serif;
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+
+  .empty-text {
+    color: var(--muted);
+    margin: 20px;
+    font-size: 1.1rem;
+  }
+
+  .explore-btn {
+    display: inline-block;
+    background: var(--gold);
+    color: black;
+    padding: 14px 30px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-top: 20px;
+    transition: 0.3s;
+  }
+
+  .explore-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(195, 155, 52, 0.4);
+  }
+
+  /* =====================================================
+   FOOTER
+===================================================== */
+
+  .lumina-footer {
+    padding: 70px 20px;
+    text-align: center;
+    background: #060914;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .lumina-footer h2 {
+    font-family: "Cinzel", serif;
+    color: var(--gold);
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    margin-bottom: 20px;
+  }
+
+  .lumina-footer p {
+    max-width: 650px;
+    padding: 0 15px;
+    margin: auto;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .footer-line {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 35px auto;
+    max-width: 500px;
+  }
+
+  .lumina-footer span {
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+
+  /* =====================================================
+   RESPONSIVE DESIGN
+===================================================== */
+
+  @media (max-width: 1024px) {
+    .collection-title {
+      font-size: 3rem;
+    }
+
+    .collection-back {
+      left: 25px;
+    }
+
+    .collection-hero {
+      padding: 110px 40px 80px;
+    }
+
+    .collection-section {
+      padding: 0 40px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .navbar {
+      top: 0;
+      height: 70px;
+      padding: 0 18px;
+      z-index: 99999;
+    }
+
+    .menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: 1px solid rgba(195, 155, 52, 0.35);
+      background: rgba(6, 9, 20, 0.9);
+      color: var(--prestige-gold);
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 100001;
+    }
+
+    .nav-links {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 85%;
+      max-width: 320px;
+      height: 100vh;
+
+      background: rgba(2, 3, 7, 0.98);
+      backdrop-filter: blur(30px);
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 28px;
+
+      transition: 0.4s ease;
+      z-index: 100000;
+
+      border-left: 1px solid rgba(195, 155, 52, 0.25);
+    }
+
+    .nav-links.active {
+      right: 0;
+    }
+
+    .nav-links a {
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+      color: white;
+    }
+
+    .logout-btn {
+      width: 220px;
+      text-align: center;
+      border-radius: 14px;
+    }
+
+    .nav-active::after {
+      display: none;
+    }
+
+    .nav-links::before {
+      content: "LuminaRecs";
+      position: absolute;
+      top: 90px;
+      font-family: "Cinzel", serif;
+      font-size: 2rem;
+      color: var(--prestige-gold);
+    }
+    .collection-hero{
+      padding: 120px 18px 40px;
+    }
+    .collection-title{
+      font-size: 2rem;
+    }
+    .collection-description{
+      font-size: .95rem;
+      line-height: 1.7;
+    }
+  }
+  @media (max-width: 600px) {
+    .collection-hero {
+      padding: 90px 20px 50px;
+    }
+    .collection-tag {
+      margin-top: 30px;
+      font-size: 10px;
+      letter-spacing: 0.35em;
+    }
+    .collection-title {
+      font-size: 2rem;
+      line-height: 1.15;
+    }
+
+    .collection-description {
+      font-size: 0.95rem;
+    }
+
+    .movie-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .collection-back {
+      position: relative;
+      top: auto;
+      left: auto;
+      margin-bottom: 35px;
+    }
+    .collection-back a {
+      display: inline-flex;
+      padding: 12px 22px;
+    }
+    .movie-card {
+      width: 100%;
+      min-width: 0;
+    }
+    .movie-info {
+      padding: 12px;
+    }
+    .movie-title {
+      font-size: 0.95rem;
+    }
+    .movie-meta,
+    .movie-genres {
+      font-size: 0.75rem;
+    }
+
+    .stat-card {
+      padding: 22px;
+    }
+
+    .ai-panel {
+      padding: 30px;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+    }
+
+    .collection-section {
+      padding: 0 20px;
+      margin-bottom: 50px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-btn {
+      width: 100%;
+      text-align: center;
+    }
+    .page-current {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .movie-grid {
+      grid-template-columns: 1fr;
+    }
+    .collection-title {
+      font-size: 1.8rem;
+    }
+    .section-title {
+      font-size: 1.5rem;
+    }
+  }
+
+  @media (hover: none) {
+    .movie-card:hover {
+      transform: none;
+    }
+    .movie-card:hover .poster img {
+      transform: none;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+
+<div class="collection-page">
+  <!-- Hero Section -->
+  <section class="collection-hero">
+    <div class="collection-back">
+      <a href="javascript:history.back()"> ← Back </a>
+    </div>
+
+    <div class="collection-tag">CURATED COLLECTION</div>
+
+    <h1 class="collection-title">{{ title }}</h1>
+
+    <p class="collection-description">{{ description }}</p>
+  </section>
+
+  <!-- Movies Section -->
+  <section class="collection-section">
+    {% if movies %}
+
+    <div class="movie-grid">
+      {% for movie in movies %}
+      <a href="{% url 'movie_details' movie.id %}" class="movie-card">
+        <div class="poster">
+          {% if movie.poster_url %}
+          <img
+            src="https://image.tmdb.org/t/p/w500{{ movie.poster_url }}"
+            alt="{{ movie.title }}"
+          />
+          {% else %}
+          <img
+            src="{% static 'images/default-poster.svg' %}"
+            alt="Default Poster"
+          />
+          {% endif %}
+
+          <span class="movie-badge">
+            ⭐ {{ movie.vote_average|floatformat:1 }}
+          </span>
+
+          <div class="poster-overlay">
+            <span class="view-btn"> View Details </span>
+          </div>
+        </div>
+
+        <div class="movie-info">
+          <h3 class="movie-title">{{ movie.title }}</h3>
+
+          <div class="movie-meta">🎬 {{ movie.release_year }}</div>
+
+          <div class="movie-genres">{{ movie.genres|truncatewords:3 }}</div>
+
+          <div class="ai-match">AI Recommendation: 92%</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% else %}
+
+    <div class="movie-grid">
+      <div class="empty-state">
+        <h3 class="empty-title">No Movies Found</h3>
+
+        <p class="empty-text">This collection doesn't have any movies yet.</p>
+
+        <a href="{% url 'discover' %}" class="explore-btn">
+          Explore More Collections
+        </a>
+      </div>
+    </div>
+
+    {% endif %} {% if page_obj.has_other_pages %}
+
+    <div class="pagination-container">
+      {% if page_obj.has_previous %}
+
+      <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+        ← Previous
+      </a>
+
+      {% endif %}
+
+      <span class="page-current">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+
+      {% if page_obj.has_next %}
+
+      <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+        Next →
+      </a>
+
+      {% endif %}
+    </div>
+
+    {% endif %}
+  </section>
+
+  <!-- Similar Collections -->
+
+  <section class="collection-section">
+    <div class="section-header">
+      <div class="collection-tag">DISCOVER MORE</div>
+
+      <h2 class="section-title">Explore Similar Collections</h2>
+
+      <p class="section-subtitle">
+        Continue your cinematic journey with collections created by LuminaRecs
+        AI.
+      </p>
+    </div>
+
+    <div class="movie-grid">
+      {% for collection in similar_collections %}
+
+      <a
+        href="{% url 'collection_movies' collection.slug %}"
+        class="movie-card"
+      >
+        <div class="poster">
+          {% with movie=collection.movies.first %} {% if movie.poster_url %}
+
+          <img
+            src="https://image.tmdb.org/t/p/w500{{movie.poster_url}}"
+            alt="{{collection.name}}"
+          />
+
+          {% else %}
+
+          <img
+            src="{% static 'images/default-poster.svg' %}"
+            alt="Collection"
+          />
+
+          {% endif %} {% endwith %}
+
+          <div class="poster-overlay">
+            <span class="view-btn"> Explore </span>
+          </div>
+        </div>
+
+        <div class="movie-info">
+          <h3 class="movie-title">{{collection.name}}</h3>
+
+          <div class="movie-meta">🎬 {{collection.movies.count}} Movies</div>
+
+          <div class="movie-genres">
+            {{collection.description|truncatewords:5}}
+          </div>
+        </div>
+      </a>
+
+      {% empty %}
+
+      <div class="empty-state">
+        <h3>No Collections Available</h3>
+      </div>
+
+      {% endfor %}
+    </div>
+  </section>
+  <!-- AI Analysis Panel -->
+  <section class="collection-section">
+    <div class="ai-panel">
+      <h3>🤖 LuminaRecs AI Collection Analysis</h3>
+
+      <p>
+        LuminaRecs understands your cinematic preferences using AI-powered
+        recommendation intelligence. Every collection is analyzed through movie
+        popularity, storytelling patterns, genres and viewer engagement.
+      </p>
+
+      <p>
+        The more you watch, rate and save movies, the smarter your personalized
+        recommendation engine becomes.
+      </p>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="collection-section">
+    <div class="ai-panel">
+      <h3>Your Next Cinematic Adventure Awaits</h3>
+
+      <p>
+        LuminaRecs is more than a movie platform. It is your AI-powered
+        cinematic companion that helps you discover stories matching your mood,
+        personality and interests.
+      </p>
+
+      <p>
+        Watch movies, build your wishlist and create your personal cinema
+        universe.
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- Footer -->
+<footer class="lumina-footer">
+  <h2>LuminaRecs</h2>
+
+  <p>
+    Your AI-powered cinematic companion. Discover stories, explore worlds and
+    create your personal movie universe.
+  </p>
+
+  <div class="footer-line"></div>
+
+  <span> © 2026 LuminaRecs. All Rights Reserved. </span>
+</footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    /* ==========================================
+     MOVIE REVEAL ANIMATION
+  ========================================== */
+
+    const cards = document.querySelectorAll(".movie-card");
+
+    cards.forEach((card, index) => {
+      setTimeout(() => {
+        card.classList.add("show");
+      }, index * 120);
+    });
+
+    /* ==========================================
+     IMAGE FALLBACK
+  ========================================== */
+
+    document.querySelectorAll(".poster img").forEach((img) => {
+      img.onerror = function () {
+        this.src = "{% static 'images/default-poster.svg' %}";
+      };
+    });
+  });
+</script>
+
+{% endblock %}

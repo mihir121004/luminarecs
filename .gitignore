@@ -1,0 +1,34 @@
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+.venv/
+
+# Django runtime files
+db.sqlite3
+staticfiles/
+media/
+logs/
+
+# Generated ML artifacts (store/version these outside the source tree)
+platform_engine/ml_engine/model_data/
+platform_engine/ml_models/
+*.pkl
+*.index
+*.faiss
+
+# Tooling and editor files
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Watch History | LuminaRecs{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-title">Watch History</h1>
+  <div class="movie-grid">
+    {% for item in history %}
+      <a href="{% url 'movie_details' item.movie.id %}" class="movie-card">
+        <div class="movie-info">
+          <h2 class="movie-title">{{ item.movie.title }}</h2>
+          <p class="movie-meta">Viewed {{ item.watched_at|date:"M j, Y" }}</p>
+        </div>
+      </a>
+    {% empty %}
+      <p class="empty-card">Your watch history is empty. Discover a movie to get started.</p>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav class="pagination-nav" style="margin-top: 50px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+    {% if page_obj.has_previous %}
+      <a href="?page=1" style="padding: 12px 20px; border: 1px solid rgba(195,155,52,.4); color: white; text-decoration: none; border-radius: 8px;">&laquo; First</a>
+      <a href="?page={{ page_obj.previous_page_number }}" style="padding: 12px 20px; border: 1px solid rgba(195,155,52,.4); color: white; text-decoration: none; border-radius: 8px;">&lsaquo; Prev</a>
+    {% endif %}
+
+    <span style="padding: 12px 20px; background: rgba(195,155,52,.15); border: 1px solid rgba(195,155,52,.5); color: #e6c15c; border-radius: 8px;">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" style="padding: 12px 20px; border: 1px solid rgba(195,155,52,.4); color: white; text-decoration: none; border-radius: 8px;">Next &rsaquo;</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}" style="padding: 12px 20px; border: 1px solid rgba(195,155,52,.4); color: white; text-decoration: none; border-radius: 8px;">Last &raquo;</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endblock %}

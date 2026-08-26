@@ -1,0 +1,564 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+My Wishlist • LuminaRecs
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* =====================================================
+     WISHLIST PAGE STYLES
+  ===================================================== */
+
+  :root {
+    --gold: #c39b34;
+    --black: #020307;
+    --film: #060914;
+    --muted: #9ca3af;
+    --border: rgba(255, 255, 255, .08);
+  }
+
+  /* GLOBAL RESET & BODY */
+  body {
+    background: var(--black);
+    color: white;
+    overflow-x: hidden;
+    font-family: "Inter", sans-serif;
+  }
+
+  /* HERO SECTION */
+  .wishlist-hero {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 180px 70px 100px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(rgba(2, 3, 7, .70), rgba(2, 3, 7, .98)),
+                url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1800&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .wishlist-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, transparent 20%, rgba(2, 3, 7, .95));
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-tag {
+    color: var(--gold);
+    letter-spacing: .45em;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    font-family: "Cinzel", serif;
+    font-size: 4.5rem;
+    margin-bottom: 20px;
+  }
+
+  .hero-subtitle {
+    max-width: 750px;
+    margin: auto;
+    color: #c6ced8;
+    line-height: 1.9;
+    font-size: 1.1rem;
+  }
+
+  /* MAIN SECTION CONTAINER */
+  .section {
+    width: min(1400px, 92%);
+    margin: 80px auto;
+  }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+    margin-bottom: 70px;
+  }
+
+  .stat-card {
+    background: rgba(6, 9, 20, .85);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 35px;
+    text-align: center;
+    transition: .4s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--gold);
+  }
+
+  .stat-value {
+    font-family: "Cinzel", serif;
+    font-size: 3rem;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .stat-title {
+    color: var(--muted);
+  }
+
+  /* MOVIE GRID */
+  .movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 35px;
+  }
+
+  /* MOVIE CARD */
+  .movie-card {
+    background: rgba(6, 9, 20, .82);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: .45s;
+  }
+
+  .movie-card:hover {
+    transform: translateY(-12px);
+    border-color: var(--gold);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, .45);
+  }
+
+  /* POSTER AREA */
+  .poster {
+    position: relative;
+    aspect-ratio: 2/3;
+    overflow: hidden;
+  }
+
+  .poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: .6s;
+  }
+
+  .movie-card:hover .poster img {
+    transform: scale(1.08);
+  }
+
+  .poster::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, .85));
+    opacity: .7;
+  }
+
+  /* BADGE */
+  .wishlist-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 2;
+    padding: 8px 15px;
+    background: rgba(0, 0, 0, .75);
+    backdrop-filter: blur(10px);
+    color: var(--gold);
+    border-radius: 20px;
+    font-size: .85rem;
+  }
+
+  /* POSTER ACTIONS */
+  .poster-actions {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: .4s;
+  }
+
+  .movie-card:hover .poster-actions {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .action-btn {
+    padding: 10px 16px;
+    text-decoration: none;
+    font-size: .85rem;
+    border-radius: 10px;
+    transition: .3s;
+  }
+
+  .view-btn {
+    background: var(--gold);
+    color: black;
+  }
+
+  .remove-btn {
+    background: #991b1b;
+    color: white;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-3px);
+  }
+
+  /* MOVIE INFO */
+  .movie-info {
+    padding: 22px;
+  }
+
+  .movie-title {
+    font-family: "Cinzel", serif;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .movie-meta {
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    font-size: .9rem;
+  }
+
+  .rating {
+    color: #ffd700;
+  }
+
+  /* AI WISHLIST INTELLIGENCE */
+  .ai-section {
+    margin-top: 80px;
+  }
+
+  .ai-box {
+    background: linear-gradient(135deg, rgba(195, 155, 52, .18), rgba(6, 9, 20, .9));
+    border: 1px solid rgba(195, 155, 52, .25);
+    border-radius: 25px;
+    padding: 50px;
+  }
+
+  .ai-title {
+    font-family: "Cinzel", serif;
+    color: var(--gold);
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  .ai-text {
+    color: #d1d5db;
+    line-height: 2;
+    max-width: 900px;
+  }
+
+  /* AI INSIGHTS GRID */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    margin-top: 40px;
+  }
+
+  .insight-card {
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 25px;
+    text-align: center;
+  }
+
+  .insight-value {
+    color: var(--gold);
+    font-family: "Cinzel", serif;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+
+  .insight-label {
+    color: var(--muted);
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    background: rgba(6, 9, 20, .85);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    padding: 90px 40px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 25px;
+  }
+
+  .empty-title {
+    font-family: "Cinzel", serif;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+  }
+
+  .empty-text {
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 650px;
+    margin: 0 auto 35px;
+  }
+
+  .explore-btn {
+    display: inline-block;
+    padding: 15px 35px;
+    background: var(--gold);
+    color: black;
+    text-decoration: none;
+    font-weight: 700;
+    border-radius: 12px;
+    transition: .35s;
+  }
+
+  .explore-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(195, 155, 52, .3);
+  }
+
+  /* BACK BUTTON */
+  .back-wrapper {
+    margin-bottom: 40px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 25px;
+    text-decoration: none;
+    color: white;
+    border: 1px solid rgba(195, 155, 52, .35);
+    background: rgba(6, 9, 20, .75);
+    backdrop-filter: blur(15px);
+    border-radius: 12px;
+    transition: .35s;
+  }
+
+  .back-btn:hover {
+    background: var(--gold);
+    color: black;
+  }
+
+  /* FOOTER */
+  .wishlist-footer {
+    margin-top: 100px;
+    padding: 60px 30px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(0, 0, 0, .35);
+  }
+
+  .footer-logo {
+    font-family: "Cinzel", serif;
+    font-size: 2rem;
+    color: var(--gold);
+    margin-bottom: 15px;
+  }
+
+  .footer-text {
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 700px;
+    margin: auto;
+  }
+
+  /* RESPONSIVE DESIGN */
+  @media(max-width: 900px) {
+    .wishlist-hero {
+      padding: 150px 25px 80px;
+    }
+    .hero-title {
+      font-size: 3rem;
+    }
+    .section {
+      width: 94%;
+    }
+  }
+
+  @media(max-width: 600px) {
+    .hero-title {
+      font-size: 2.4rem;
+    }
+    .ai-box {
+      padding: 30px;
+    }
+    .movie-grid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 20px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="wishlist-hero">
+  <div class="hero-content">
+    <div class="hero-tag">PERSONAL COLLECTION</div>
+    <h1 class="hero-title">Your Cinema Wishlist</h1>
+    <p class="hero-subtitle">
+      Handpicked stories, anticipated blockbusters, and timeless classics queued for your next viewing session.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+
+  <div class="back-wrapper">
+    <a href="javascript:history.back()" class="back-btn">
+      ← Back
+    </a>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ wishlist_movies|length|default:"0" }}</div>
+      <div class="stat-title">Saved Movies</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ total_duration|default:"0" }}h</div>
+      <div class="stat-title">Watch Duration</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ top_genre|default:"Sci-Fi" }}</div>
+      <div class="stat-title">Top Wishlist Genre</div>
+    </div>
+  </div>
+
+  {% if wishlist_movies %}
+    <div class="movie-grid">
+      {% for item in wishlist_movies %}
+        <div class="movie-card">
+          <div class="poster">
+            {% if item.movie.poster_url %}
+              <img src="{{ item.movie.poster_url }}" alt="{{ item.movie.title }}">
+            {% else %}
+              <img src="{% static 'images/default-poster.svg' %}" alt="Movie Poster">
+            {% endif %}
+
+            <div class="wishlist-badge">
+              ♥ Wishlist
+            </div>
+
+            <div class="poster-actions">
+              <a href="{% url 'movie_details' item.movie.id %}" class="action-btn view-btn">
+                View
+              </a>
+              <form method="post" action="{% url 'remove_from_wishlist' item.movie.id %}">
+                {% csrf_token %}
+                <button type="submit" class="action-btn remove-btn">Remove</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="movie-info">
+            <div class="movie-title">{{ item.movie.title }}</div>
+            <div class="movie-meta">
+              <span>{{ item.movie.release_year }}</span>
+              <span class="rating">⭐ {{ item.movie.rating|default:"N/A" }}</span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🎬</div>
+      <h2 class="empty-title">Your Wishlist Is Empty</h2>
+      <p class="empty-text">
+        Your personal cinema collection is waiting. Explore movies, discover hidden gems, and save the ones you want to experience later.
+      </p>
+      <a href="{% url 'discover' %}" class="explore-btn">
+        Explore Movies
+      </a>
+    </div>
+  {% endif %}
+
+  <section class="ai-section">
+    <div class="ai-box">
+      <h2 class="ai-title">🤖 LuminaRecs AI Wishlist Analysis</h2>
+      <p class="ai-text">
+        Based on your saved movies, LuminaRecs AI understands your upcoming cinematic interests and predicts what kind of movies you may enjoy next. Your wishlist helps the recommendation engine create more accurate personalized suggestions.
+      </p>
+
+      <div class="insight-grid">
+        <div class="insight-card">
+          <div class="insight-value">45%</div>
+          <div class="insight-label">Sci-Fi Preference</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-value">30%</div>
+          <div class="insight-label">Thriller Interest</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-value">25%</div>
+          <div class="insight-label">Drama Collection</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-value">96%</div>
+          <div class="insight-label">AI Taste Match</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="wishlist-footer">
+    <div class="footer-logo">LuminaRecs</div>
+    <p class="footer-text">
+      Your intelligent cinema companion. Every saved movie helps LuminaRecs AI understand your taste and discover your next unforgettable experience.
+    </p>
+  </footer>
+
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    /* Wishlist Card Reveal Animation */
+    const cards = document.querySelectorAll(".movie-card");
+    cards.forEach((card, index) => {
+      card.style.opacity = "0";
+      card.style.transform = "translateY(40px)";
+
+      setTimeout(() => {
+        card.style.transition = "all .6s ease";
+        card.style.opacity = "1";
+        card.style.transform = "translateY(0)";
+      }, index * 100);
+    });
+
+    /* Image Loading Protection */
+    document.querySelectorAll(".poster img").forEach(img => {
+      img.onerror = function() {
+        this.src = "{% static 'images/default-poster.svg' %}";
+      };
+    });
+  });
+</script>
+
+{% endblock %}

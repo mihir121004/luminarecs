@@ -1,0 +1,739 @@
+{% extends "base.html" %} {% load static %} {% block title %} LuminaRecs •
+Wishlist {% endblock %} {% block extra_css %}
+<style>
+  :root {
+    --gold: #c39b34;
+    --cinema: #020307;
+    --film: #060914;
+    --muted: #9ca3af;
+    --white: #ffffff;
+  }
+
+  /* ======================================
+       HERO
+    ====================================== */
+  .wishlist-hero {
+    padding-top: 90px;
+    min-height: 70vh;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    filter: brightness(0.3);
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(2, 3, 7, 0.55), rgba(2, 3, 7, 0.95));
+    z-index: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 5;
+    max-width: 850px;
+    padding: 0 25px;
+  }
+
+  .hero-tag {
+    color: var(--gold);
+    letter-spacing: 0.45em;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    font-family: "Cinzel", serif;
+    color: white;
+    font-size: clamp(2rem, 7vw, 4.5rem);
+    margin-bottom: 20px;
+  }
+
+  .hero-title span {
+    color: var(--gold);
+  }
+
+  .hero-description {
+    color: #c4ccd7;
+    line-height: 2;
+    font-size: 1.05rem;
+  }
+
+  /* ======================================
+       STATS
+    ====================================== */
+  .stats-section {
+    padding: 80px 8%;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+  }
+
+  .stat-card {
+    background: rgba(6, 9, 20, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 35px;
+    text-align: center;
+    transition: 0.4s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--gold);
+  }
+
+  .stat-number {
+    color: var(--gold);
+    font-family: "Cinzel", serif;
+    font-size: 2.5rem;
+  }
+
+  .stat-label {
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  /* ======================================
+       SECTION
+    ====================================== */
+  .section {
+    padding: 90px 8%;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: 40px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: "Cinzel", serif;
+    color: white;
+    font-size: 2.5rem;
+  }
+
+  .section-subtitle {
+    color: var(--muted);
+  }
+
+  /* ======================================
+       MOVIE GRID
+    ====================================== */
+  .movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+  }
+
+  .movie-card {
+    text-decoration: none;
+    color: white;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .movie-card:hover {
+    transform: translateY(-12px);
+  }
+
+  .poster {
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    background: #060914;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.55);
+  }
+
+  .poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.75;
+    transition: 0.7s;
+  }
+
+  .movie-card:hover .poster img {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+
+  .movie-card:hover .poster {
+    border-color: var(--gold);
+  }
+
+  .rating-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: black;
+    color: var(--gold);
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .poster-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    padding: 20px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.92));
+    opacity: 0;
+    transition: 0.4s;
+  }
+
+  .movie-card:hover .poster-overlay {
+    opacity: 1;
+  }
+
+  .quick-btn {
+    border: 1px solid var(--gold);
+    padding: 10px 18px;
+    color: white;
+    font-size: 0.85rem;
+  }
+
+  .movie-info {
+    padding-top: 18px;
+  }
+
+  .movie-title {
+    font-family: "Cinzel", serif;
+    font-size: 1.15rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .movie-meta {
+    margin-top: 8px;
+    color: #9ca3af;
+    font-size: 0.9rem;
+  }
+
+  .wishlist-search-form {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 40px;
+    width: 100%;
+  }
+
+  .wishlist-search-input {
+    flex: 1;
+    height: 60px;
+    background: rgba(6, 9, 20, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: white;
+    padding: 0 20px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(20px);
+  }
+
+  .wishlist-search-input::placeholder {
+    color: #9ca3af;
+  }
+
+  .wishlist-search-input:focus {
+    border-color: #c39b34;
+    box-shadow: 0 0 20px rgba(195, 155, 52, 0.25);
+  }
+
+  .wishlist-search-btn {
+    min-width: 120px;
+    background: #c39b34;
+    color: #020307;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    letter-spacing: 0.05em;
+  }
+
+  .wishlist-search-btn:hover {
+    transform: translateY(-3px);
+    background: #e4c978;
+    box-shadow: 0 10px 25px rgba(195, 155, 52, 0.3);
+  }
+
+  /* ======================================
+       ACTIONS
+    ====================================== */
+  .card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .action-btn {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px;
+    background: #060914;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: 0.35s;
+  }
+
+  .action-btn:hover {
+    background: var(--gold);
+    color: black;
+  }
+
+  .remove-btn:hover {
+    background: #b91c1c;
+    color: white;
+  }
+
+  /* ======================================
+       EMPTY STATE
+    ====================================== */
+  .empty-state {
+    background: rgba(6, 9, 20, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 90px 40px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+  }
+
+  .empty-title {
+    font-family: "Cinzel", serif;
+    color: var(--gold);
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+
+  .empty-description {
+    color: #9ca3af;
+    max-width: 650px;
+    margin: auto;
+    line-height: 2;
+  }
+
+  .discover-btn {
+    display: inline-block;
+    margin-top: 30px;
+    text-decoration: none;
+    background: var(--gold);
+    color: black;
+    padding: 14px 28px;
+    font-weight: 700;
+    transition: 0.4s;
+  }
+
+  .discover-btn:hover {
+    transform: translateY(-4px);
+  }
+
+  /* ======================================
+       AI SUGGESTIONS PANEL
+    ====================================== */
+  .ai-panel {
+    background: rgba(6, 9, 20, 0.88);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 40px;
+  }
+
+  .ai-intro {
+    color: white;
+    margin-bottom: 25px;
+    line-height: 1.9;
+  }
+
+  .ai-item {
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #c7d0db;
+  }
+
+  .ai-item:last-child {
+    border-bottom: none;
+  }
+
+  .ai-item strong {
+    color: var(--gold);
+  }
+
+  /* ======================================
+       INSIGHTS CARDS
+    ====================================== */
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+
+  .insight-card {
+    background: rgba(6, 9, 20, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 35px;
+  }
+
+  .insight-title {
+    color: var(--gold);
+    font-family: "Cinzel", serif;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+
+  .insight-card p {
+    color: #c7d0db;
+    line-height: 2;
+  }
+
+  /* ======================================
+       MOBILE RESPONSIVENESS
+    ====================================== */
+  @media (max-width: 1100px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .insights-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 3rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .movie-grid {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 180px));
+    }
+
+    .movie-card {
+      width: 180px;
+    }
+
+    .poster {
+      width: 180px;
+      height: 270px;
+    }
+
+    .section-title {
+      font-size: 2rem;
+    }
+
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    .wishlist-search-form {
+      flex-direction: column;
+    }
+
+    .wishlist-search-btn {
+      width: 100%;
+      height: 55px;
+    }
+  }
+  @media (max-width: 480px) {
+    .stats-section {
+      padding: 50px 20px;
+    }
+    .stat-card {
+      padding: 25px;
+    }
+    .stat-number {
+      font-size: 2rem;
+    }
+  }
+  @media (max-width: 380px) {
+    .card-actions {
+      flex-direction: column;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+
+<!-- HERO -->
+<section class="wishlist-hero">
+  <video autoplay muted loop playsinline class="hero-video">
+    <source src="{% static 'videos/wishlist.mp4' %}" type="video/mp4" />
+  </video>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-tag">PERSONAL CINEMA COLLECTION</div>
+    <h1 class="hero-title">Your <span>Wishlist</span></h1>
+    <p class="hero-description">
+      Save movies, build your cinematic identity, and allow LuminaRecs AI to
+      create increasingly personalized recommendations.
+    </p>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">{{ wishlist_count }}</div>
+      <div class="stat-label">Saved Movies</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ watched_count|default:"0" }}</div>
+      <div class="stat-label">Watched</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ pending_count|default:"0" }}</div>
+      <div class="stat-label">Watch Later</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ recommendation_accuracy|default:"96" }}%</div>
+      <div class="stat-label">AI Accuracy</div>
+    </div>
+  </div>
+</section>
+
+<!-- MY WISHLIST SECTION -->
+<section class="section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">My Wishlist</h2>
+      <div class="section-subtitle">Saved movies for future viewing</div>
+    </div>
+    <div class="section-subtitle">
+      {{ wishlist_count }} Movies Saved
+    </div>
+  </div>
+
+  <form method="GET" class="wishlist-search-form">
+    <input
+      type="text"
+      name="search"
+      placeholder="Search your wishlist.."
+      value="{{ request.GET.search}}"
+      class="wishlist-search-input"
+    />
+
+    <button type="submit" class="wishlist-search-btn">Search</button>
+  </form>
+
+  {% if wishlist_movies %}
+  <div class="movie-grid">
+    {% for movie in wishlist_movies %}
+    <div class="movie-card">
+      <a href="{% url 'movie_details' movie.id %}">
+        <div class="poster">
+          {% if movie.poster_url %}
+          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
+          {% else %}
+          <img
+            src="{% static 'images/no-poster.svg' %}"
+            alt="{{ movie.title }}"
+          />
+          {% endif %}
+
+          <div class="rating-badge">
+            ★ {{ movie.vote_average|default:"8.5" }}
+          </div>
+
+          <div class="poster-overlay">
+            <div class="quick-btn">View Details</div>
+          </div>
+        </div>
+      </a>
+
+      <div class="movie-info">
+        <div class="movie-title">{{ movie.title }}</div>
+        <div class="movie-meta">{{ movie.release_year|default:"2026" }}</div>
+      </div>
+
+      <div class="card-actions">
+        <a href="{% url 'movie_details' movie.id %}" class="action-btn">
+          Details
+        </a>
+        <form method="post" action="{% url 'remove_from_wishlist' movie.id %}">
+          {% csrf_token %}
+          <button type="submit" class="action-btn remove-btn">Remove</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav style="margin-top: 50px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+    {% if page_obj.has_previous %}
+      <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" style="padding: 12px 20px; border: 1px solid rgba(195,155,52,.4); color: white; text-decoration: none; border-radius: 8px;">&laquo; First</a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" style="padding: 12px 20px; border: 1px solid rgba(195,155,52,.4); color: white; text-decoration: none; border-radius: 8px;">&lsaquo; Prev</a>
+    {% endif %}
+
+    <span style="padding: 12px 20px; background: rgba(195,155,52,.15); border: 1px solid rgba(195,155,52,.5); color: #e6c15c; border-radius: 8px;">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" style="padding: 12px 20px; border: 1px solid rgba(195,155,52,.4); color: white; text-decoration: none; border-radius: 8px;">Next &rsaquo;</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" style="padding: 12px 20px; border: 1px solid rgba(195,155,52,.4); color: white; text-decoration: none; border-radius: 8px;">Last &raquo;</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🎬</div>
+    <div class="empty-title">Your Wishlist Is Empty</div>
+    <div class="empty-description">
+      Start exploring movies and save the ones you want to watch later.
+      LuminaRecs AI will learn your taste and generate better recommendations.
+    </div>
+    <a href="{% url 'discover' %}" class="discover-btn"> Discover Movies </a>
+  </div>
+  {% endif %}
+</section>
+
+<!-- AI SUGGESTIONS SECTION -->
+<section class="section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">AI Suggestions</h2>
+      <div class="section-subtitle">Personalized Discovery Engine</div>
+    </div>
+  </div>
+
+  <div class="ai-panel">
+    {% if ai_suggestions %}
+    <div class="ai-intro">
+      🤖 Based on your wishlist and viewing preferences, LuminaRecs recommends
+      these movies:
+    </div>
+
+    {% for movie in ai_suggestions %}
+    <div class="ai-item">
+      🎬 <strong>{{ movie.title }}</strong>
+      {% if movie.genres %} — {{ movie.genres }} {% endif %}
+    </div>
+    {% endfor %} {% else %}
+    <div class="ai-intro">
+      Add more movies to your wishlist and LuminaRecs AI will generate highly
+      personalized recommendations.
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- CINEMA INSIGHTS SECTION -->
+<section class="section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Cinema Insights</h2>
+      <div class="section-subtitle">Understanding Your Taste</div>
+    </div>
+  </div>
+
+  <div class="insights-grid">
+    <div class="insight-card">
+      <div class="insight-title">Viewing Profile</div>
+      <p>
+        🎬 Saved Movies:
+        <strong>{{ wishlist_count }}</strong>
+      </p>
+      <p>
+        ⭐ Average Rating:
+        <strong>{{ average_rating|default:"8.5" }}</strong>
+      </p>
+      <p>
+        🎭 Favorite Genre:
+        <strong>{{ favorite_genre }}</strong>
+      </p>
+      <p>
+        🤖 AI Accuracy:
+        <strong>{{ recommendation_accuracy|default:"96" }}%</strong>
+      </p>
+      <p>
+        🎭 Personality:
+        <strong>{{ personality }}</strong>
+      </p>
+
+      <p>
+        🎬 Watching Style:
+        <strong>{{ watching_style }}</strong>
+      </p>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-title">Recommendation Engine</div>
+      <p>
+        Every movie added to your wishlist helps LuminaRecs understand your
+        cinematic preferences.
+      </p>
+      <br />
+      <p>
+        The recommendation engine analyzes genres, ratings, popularity, watch
+        behavior and viewing patterns to create better suggestions.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- CINEMA JOURNEY SECTION -->
+<section class="section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Your Cinema Journey</h2>
+      <div class="section-subtitle">Powered by LuminaRecs Intelligence</div>
+    </div>
+  </div>
+
+  <div class="ai-panel">
+    <div class="ai-item">🎞 Movie Preferences Analysis</div>
+    <div class="ai-item">🎭 Genre Affinity Tracking</div>
+    <div class="ai-item">⭐ Rating Behavior Analysis</div>
+    <div class="ai-item">🧠 AI Recommendation Learning</div>
+    <div class="ai-item">🚀 Discovery Pattern Recognition</div>
+    <div class="ai-item">🎬 Personalized Cinema Experience</div>
+    <br />
+    <div class="ai-intro">
+      Your wishlist is more than a collection of movies. It is the foundation of
+      a personalized cinematic ecosystem that evolves with every movie you save.
+    </div>
+  </div>
+</section>
+{% endblock %} {% block extra_js %}
+<script>
+  document.querySelectorAll(".movie-card").forEach((card) => {
+    card.addEventListener("mouseenter", () => {
+      card.style.transition = "all .6s cubic-bezier(.16,1,.3,1)";
+    });
+  });
+</script>
+{% endblock %}

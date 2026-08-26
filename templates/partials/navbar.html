@@ -1,0 +1,36 @@
+<nav class="navbar">
+
+    <a href="{% url 'homepage' %}" class="logo">
+        Lumina<span>Recs</span>
+    </a>
+
+    <div class="nav-links">
+
+        <a href="{% url 'homepage' %}">
+            Home
+        </a>
+
+        <a href="{% url 'discover' %}">
+            Discover
+        </a>
+
+        <a href="{% url 'wishlist' %}">
+            Wishlist
+        </a>
+
+        <a href="{% url 'profile' %}">
+            Profile
+        </a>
+
+        <a href="{% url 'trailers' %}">
+            Trailers
+        </a>
+
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+
+    </div>
+
+</nav>

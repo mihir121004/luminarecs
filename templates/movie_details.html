@@ -1,0 +1,1518 @@
+{% extends "base.html" %} {% load static %} {% block title %} {{ movie.title }}
+• LuminaRecs {% endblock %} {% block extra_css %}
+<style>
+  :root {
+    --gold: #c39b34;
+    --black: #020307;
+    --surface: rgba(8, 12, 20, 0.78);
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #ffffff;
+    --muted: #b8c0cc;
+  }
+
+  /* =====================================================
+     GLOBAL
+  ===================================================== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: #020307;
+    color: white;
+    overflow-x: hidden;
+    font-family: "Inter", sans-serif;
+  }
+
+  /* =====================================================
+     FIXED VIDEO BACKGROUND
+  ===================================================== */
+  .video-background {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    overflow: hidden;
+  }
+
+  .video-background video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.22);
+  }
+
+  .video-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(2, 3, 7, 0.35), rgba(2, 3, 7, 0.96));
+  }
+
+  /* =====================================================
+     HERO
+  ===================================================== */
+  .hero {
+    min-height: calc(100vh - 90px);
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 120px 70px 120px;
+  }
+
+  .hero-container {
+    width: 100%;
+    max-width: 1500px;
+    margin: auto;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 70px;
+    align-items: center;
+  }
+
+  /* =====================================================
+     POSTER
+  ===================================================== */
+  .poster {
+    overflow: hidden;
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    box-shadow: 0 35px 90px rgba(0, 0, 0, 0.7);
+  }
+
+  .poster img {
+    width: 100%;
+    display: block;
+    transition: 0.7s;
+  }
+
+  .poster:hover img {
+    transform: scale(1.05);
+  }
+
+  /* =====================================================
+     CONTENT
+  ===================================================== */
+  .hero-tag {
+    color: var(--gold);
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .movie-title {
+    font-family: "Cinzel", serif;
+    font-size: 5rem;
+    line-height: 1.05;
+    margin-bottom: 30px;
+  }
+
+  .movie-overview {
+    color: #d7dce5;
+    line-height: 2;
+    font-size: 1.05rem;
+    max-width: 850px;
+    margin-bottom: 35px;
+  }
+
+  .movie-meta {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 35px;
+  }
+
+  .meta {
+    padding: 12px 20px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+  }
+  .tagline {
+    margin: 15px 0 25px;
+    color: #c39b34;
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+  /* =====================================================
+     BUTTONS
+  ===================================================== */
+  .actions {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 16px 34px;
+    border-radius: 14px;
+    text-decoration: none;
+    transition: 0.35s;
+  }
+
+  .btn-primary {
+    background: #c39b34;
+    color: black;
+    font-weight: 700;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-5px);
+  }
+
+  .btn-outline {
+    border: 1px solid rgba(195, 155, 52, 0.35);
+    color: white;
+  }
+
+  .btn-outline:hover {
+    background: var(--gold);
+    color: black;
+  }
+
+  /*============================
+  Movie Feedback Buttons
+  ============================*/
+
+  .feedback-area{
+    display: flex;
+    gap: 18px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+
+  .feedback-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 32px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: .12rem;
+    text-transform: uppercase;
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all .45s cubic-bezier(.16,1,.3,1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feedback-btn::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(195,155,52,.25) transparent);
+    transform: translateX(-120%);
+    transition: .6s;
+  }
+
+  .feedback-btn:hover::before{
+    transform: translateX(120%);
+  }
+
+  .feedback-btn.like:hover{
+    border-color: #c39b34;
+    color: #c39b34;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(195, 155, 52, .25);
+
+  }
+
+  .feedback-btn.like:active{
+    background: #c39b34;
+    color: #020307;
+    border-color: #c39b34;
+  }
+
+  .feedback-btn.dislike:hover{
+    border-color: #ff5c5c;
+    color: #ff7777;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(255, 80, 80, .2);
+  }
+
+  .feedback-btn.dislike:active{
+    background: #ff5c5c;
+    color: white;
+    border-color: #ff5c5c;
+  }
+
+  .feedback-btn:active{
+    transform: scale(.94);
+  }
+
+  .feedback-message{
+    margin-top: 18px;
+    font-size: .95rem;
+    color: #c39b34;
+    min-height: 25px;
+    animation: fadeFeedback .5s ease;
+  }
+
+  @keyframes fadeFeedback{
+    from{
+      opacity:0;
+      transform: translateY(10px);
+    }
+    to{
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+
+  /* =====================================================
+     AI PANEL
+  ===================================================== */
+  .ai-panel {
+    margin-top: 45px;
+    background: rgba(8, 12, 20, 0.78);
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 35px;
+  }
+
+  .ai-title {
+    color: var(--gold);
+    font-family: "Cinzel", serif;
+    margin-bottom: 18px;
+    font-size: 1.5rem;
+  }
+
+  .ai-text {
+    color: #d5dbe3;
+    line-height: 2;
+  }
+
+  /* =====================================================
+     FLOATING CONTENT & SECTIONS
+  ===================================================== */
+  .section {
+    width: min(1400px, 92%);
+    margin: 70px auto;
+  }
+
+  .glass-panel {
+    background: rgba(8, 12, 20, 0.78);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 26px;
+    padding: 45px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  }
+
+  .section-tag {
+    color: var(--gold);
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: "Cinzel", serif;
+    font-size: 2.8rem;
+    margin-bottom: 12px;
+  }
+
+  .section-subtitle {
+    color: #c6ced8;
+    line-height: 1.8;
+  }
+
+  /* INFO GRID */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-top: 45px;
+  }
+
+  .info-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 30px;
+    transition: 0.35s;
+  }
+
+  .info-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--gold);
+  }
+
+  .info-card h3 {
+    color: var(--gold);
+    margin-bottom: 15px;
+    font-family: "Cinzel", serif;
+  }
+
+  .info-card p {
+    color: #d8d8d8;
+    line-height: 1.8;
+  }
+
+  /* AI GRID */
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    margin-top: 45px;
+  }
+
+  .ai-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 35px;
+    text-align: center;
+    transition: 0.35s;
+  }
+
+  .ai-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--gold);
+  }
+
+  .ai-score {
+    font-size: 2.4rem;
+    color: var(--gold);
+    font-family: "Cinzel", serif;
+    margin-bottom: 15px;
+  }
+
+  .ai-label {
+    color: #bfc6d1;
+  }
+
+  /* CAST */
+  .cast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 25px;
+    margin-top: 45px;
+  }
+
+  .cast-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: 0.35s;
+  }
+
+  .cast-card:hover {
+    transform: translateY(-8px);
+  }
+
+  .cast-card:hover h3 {
+    color: var(--gold);
+  }
+
+  .cast-card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+  }
+
+  .cast-content {
+    padding: 20px;
+  }
+
+  .cast-content h3 {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+    transition: 0.3s;
+    text-decoration: none;
+  }
+
+  .cast-content p {
+    color: #9ca3af;
+    text-decoration: none;
+  }
+
+  /* TRAILER */
+  .trailer {
+    margin-top: 45px;
+  }
+
+  .trailer iframe {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: none;
+    border-radius: 22px;
+  }
+
+  /* =====================================================
+     WATCH ON OTT PLATFORMS
+  ===================================================== */
+  .ott-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 25px;
+    margin-top: 45px;
+  }
+
+  .ott-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 30px 25px;
+    text-align: center;
+    text-decoration: none;
+    transition: 0.35s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ott-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--gold);
+  }
+
+  .ott-card img {
+    height: 64px;
+    max-width: 150px;
+    object-fit: contain;
+    margin-bottom: 20px;
+  }
+
+  .ott-card h3 {
+    color: white;
+    font-family: "Cinzel", serif;
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+    transition: 0.3s;
+  }
+
+  .ott-card:hover h3 {
+    color: var(--gold);
+  }
+
+  .ott-card p {
+    color: #9ca3af;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .ott-cta {
+    color: var(--gold);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .ott-all-link {
+    display: inline-block;
+    margin-top: 35px;
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+
+  .ott-all-link:hover {
+    text-decoration: underline;
+  }
+
+  .ott-empty {
+    margin-top: 45px;
+  }
+
+  /* =====================================================
+     SIMILAR MOVIES
+  ===================================================== */
+  .movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 25px;
+    margin-top: 45px;
+  }
+
+  .movie-card {
+    text-decoration: none;
+    color: white;
+    transition: 0.4s;
+  }
+
+  .movie-card:hover {
+    transform: translateY(-12px);
+  }
+
+  .movie-poster {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .movie-poster img {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    transition: 0.6s;
+  }
+
+  .movie-card:hover img {
+    transform: scale(1.08);
+  }
+
+  .movie-name {
+    margin-top: 15px;
+    font-family: "Cinzel", serif;
+    font-size: 1.1rem;
+  }
+
+  .movie-genre {
+    color: #9ca3af;
+    margin-top: 5px;
+  }
+
+  /* =====================================================
+     REVIEWS
+  ===================================================== */
+  .review-box {
+    margin-top: 40px;
+  }
+
+  .review-form {
+    margin-bottom: 45px;
+  }
+
+  .review-input,
+  .review-textarea,
+  .review-select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    min-height: 52px;
+  }
+
+  .review-textarea {
+    height: 140px;
+    resize: none;
+  }
+
+  .review-submit {
+    display: inline-block;
+    padding: 12px 24px;
+    text-decoration: none;
+    color: white;
+    border: 1px solid var(--prestige-gold, #c39b34);
+    background: rgba(6, 9, 20, 0.85);
+    backdrop-filter: blur(10px);
+    transition: 0.4s;
+  }
+  .review-submit:hover {
+    background: var(--prestige-gold, #c39b34);
+    color: black;
+    transform: translateY(-4px);
+  }
+
+  .review-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 30px;
+    margin-bottom: 20px;
+  }
+
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+
+  .review-user {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  .review-rating {
+    color: #ffd700;
+  }
+
+  .review-text {
+    color: #d5dbe3;
+    line-height: 1.8;
+  }
+
+  /* =====================================================
+     AI EXPLANATION
+  ===================================================== */
+  .ai-explanation {
+    margin-top: 40px;
+    padding: 40px;
+    background: linear-gradient(
+      135deg,
+      rgba(195, 155, 52, 0.15),
+      rgba(8, 12, 20, 0.8)
+    );
+    border-radius: 22px;
+    border: 1px solid rgba(195, 155, 52, 0.25);
+  }
+
+  .ai-explanation h3 {
+    color: var(--gold);
+    font-family: "Cinzel", serif;
+    margin-bottom: 20px;
+  }
+
+  .ai-explanation p {
+    color: #d5dbe3;
+    line-height: 2;
+  }
+
+  /* =====================================================
+     COLLECTIONS
+  ===================================================== */
+  .collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-top: 45px;
+  }
+
+  .collection-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 35px;
+    transition: 0.35s;
+  }
+
+  .collection-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--gold);
+  }
+
+  .collection-card h3 {
+    color: var(--gold);
+    font-family: "Cinzel", serif;
+    margin-bottom: 15px;
+  }
+
+  .collection-card p {
+    color: #c6ced8;
+    line-height: 1.8;
+  }
+
+  /* =====================================================
+     ADVANCED AI DASHBOARD
+  ===================================================== */
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    margin-top: 45px;
+  }
+
+  .analytics-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    padding: 35px;
+    text-align: center;
+    transition: 0.4s;
+  }
+
+  .analytics-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--gold);
+  }
+
+  .analytics-icon {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  .analytics-value {
+    font-size: 2.5rem;
+    color: var(--gold);
+    font-family: "Cinzel", serif;
+    margin-bottom: 12px;
+  }
+
+  .analytics-title {
+    color: #c6ced8;
+  }
+
+  /* =====================================================
+     AI ENGINE BOX
+  ===================================================== */
+  .engine-section {
+    text-align: center;
+  }
+
+  .engine-box {
+    background: linear-gradient(
+      135deg,
+      rgba(195, 155, 52, 0.18),
+      rgba(8, 12, 20, 0.85)
+    );
+    padding: 70px 45px;
+    border-radius: 30px;
+    border: 1px solid rgba(195, 155, 52, 0.25);
+  }
+
+  .engine-box h2 {
+    font-family: "Cinzel", serif;
+    font-size: 3rem;
+    color: var(--gold);
+    margin-bottom: 25px;
+  }
+
+  .engine-box p {
+    max-width: 850px;
+    margin: auto;
+    color: #d6dce5;
+    line-height: 2;
+    font-size: 1.05rem;
+  }
+
+  /* =====================================================
+     FOOTER
+  ===================================================== */
+  .movie-footer {
+    margin-top: 100px;
+    padding: 70px 30px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.35);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .footer-logo {
+    font-family: "Cinzel", serif;
+    font-size: 2.2rem;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+
+  .footer-text {
+    max-width: 700px;
+    margin: auto;
+    color: #9ca3af;
+    line-height: 2;
+  }
+  /* =====================================================
+   BACK BUTTON
+===================================================== */
+
+  .back-button-wrapper {
+    margin-bottom: 30px;
+    margin-top: 50px;
+  }
+
+  .back-button {
+    display: inline-block;
+    padding: 12px 24px;
+    text-decoration: none;
+    color: white;
+    border: 1px solid var(--prestige-gold, #c39b34);
+    background: rgba(6, 9, 20, 0.85);
+    backdrop-filter: blur(10px);
+    transition: 0.4s;
+  }
+
+  .back-button:hover {
+    background: var(--prestige-gold, #c39b34);
+    color: black;
+    transform: translateY(-4px);
+  }
+  /* =====================================================
+     RESPONSIVE DESIGN
+  ===================================================== */
+  @media (max-width: 900px) {
+    .hero {
+      padding: 100px 25px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .movie-title {
+      font-size: 3rem;
+    }
+
+    .glass-panel {
+      padding: 25px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .section {
+      width: 94%;
+    }
+
+    .section-title {
+      font-size: 2rem;
+    }
+
+    .analytics-card {
+      padding: 25px;
+    }
+
+    .engine-box h2 {
+      font-size: 2rem;
+    }
+
+    .movie-overview {
+      font-size: 0.95rem;
+    }
+    .feedback-are{
+      flex-direction: column;
+    }
+    .feedback-btn{
+      width: 100%;
+    }
+  }
+  @media (max-width: 768px) {
+    .back-button-wrapper {
+      padding: 95px 25px 20px;
+    }
+    .hero {
+      padding: 30px 25px 100px;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+
+<!-- ==========================================
+     FIXED VIDEO BACKGROUND
+========================================== -->
+<div class="video-background">
+  <video autoplay muted loop playsinline>
+    <source src="{% static 'videos/cinema-intro.mp4' %}" type="video/mp4" />
+  </video>
+  <div class="video-overlay"></div>
+</div>
+
+<!-- ==========================================
+     BACK BUTTON
+========================================== -->
+
+<!-- ==========================================
+     HERO SECTION
+========================================== -->
+<section class="hero">
+  <div class="hero-container">
+    <div class="back-button-wrapper">
+      <a href="javascript:history.back()" class="back-button">
+        <span>←</span>
+        Back
+      </a>
+    </div>
+    <div class="hero-grid">
+      <div class="poster">
+        {% if movie.poster_url %}
+        <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
+        {% else %}
+        <img
+          src="{% static 'images/default-poster.svg' %}"
+          alt="Default Poster"
+        />
+        {% endif %}
+      </div>
+
+      <div>
+        <div class="hero-tag">AI POWERED MOVIE PROFILE</div>
+
+        <h1 class="movie-title">{{ movie.title }}</h1>
+        {% if movie.tagline %}
+        <div class="tagline">"{{ movie.tagline }}"</div>
+        {% endif %}
+
+        <div class="movie-meta">
+          <div class="meta">⭐ {{ movie.vote_average|default:"N/A" }}</div>
+          <div class="meta">🎭 {{ movie.genres|default:"Cinema" }}</div>
+          <div class="meta">📅 {{ movie.release_year|default:"N/A" }}</div>
+          <div class="meta">⏱ {{ movie.runtime }} min</div>
+        </div>
+
+        <p class="movie-overview">
+          {{ movie.overview|default:"No description available." }}
+        </p>
+
+        <div class="actions">
+          <a href="#trailer" class="btn btn-primary"> ▶ Watch Trailer </a>
+          <form method="post" action="{% url 'add_to_wishlist' movie.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline">♡ Wishlist</button>
+          </form>
+        </div>
+
+        <div class="feedback-area">
+          <button class="feedback-btn like"
+                  data-movie-id="{{ movie.id }}"
+                  data-action="like">
+              👍 Like
+          </button>
+          <button class="feedback-btn dislike"
+                  data-movie-id="{{movie.id}}"
+                  data-action="dislike">
+              👎 Dislike
+          </button>
+
+        </div>
+        <div class="feedback-message" id="feedback-message"></div>
+
+        <div class="ai-panel">
+          <div class="ai-title">LuminaRecs AI Recommendation</div>
+          <div class="ai-text">
+            This recommendation is generated using your watch history, favorite
+            genres, user similarity, ratings and behavioral patterns.
+            <br /><br />
+            <strong>
+              Recommendation Confidence: {{ confidence|default:"96" }}%
+            </strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     MOVIE INFORMATION
+===================================================== -->
+<section class="section">
+  <div class="glass-panel">
+    <div class="section-tag">MOVIE DETAILS</div>
+    <h2 class="section-title">Behind The Film</h2>
+    <p class="section-subtitle">
+      Everything you need to know about this cinematic experience.
+    </p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>Director</h3>
+        <p>{{ movie.director|default:"Not Available" }}</p>
+      </div>
+      <div class="info-card">
+        <h3>Writer</h3>
+        <p>{{ movie.writer|default:"Not Available" }}</p>
+      </div>
+      <div class="info-card">
+        <h3>Language</h3>
+        <p>{{ movie.language|default:"English" }}</p>
+      </div>
+      <div class="info-card">
+        <h3>Country</h3>
+        <p>{{ movie.country|default:"Unknown" }}</p>
+      </div>
+      <div class="info-card">
+        <h3>Release Date</h3>
+        <p>{{ movie.release_date|default:"Not Available" }}</p>
+      </div>
+      <div class="info-card">
+        <h3>Budget</h3>
+        <p>{{ movie.budget|default:"Not Available" }}</p>
+      </div>
+      <div class="info-card">
+        <h3>Status</h3>
+        <p>{{ movie.status }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     WATCH ON OTT PLATFORMS
+===================================================== -->
+<section class="section">
+  <div class="glass-panel">
+    <div class="section-tag">STREAMING</div>
+    <h2 class="section-title">Where To Watch</h2>
+    <p class="section-subtitle">
+      {{ movie.title }} is currently available on these OTT platforms. Click a
+      platform to open it.
+    </p>
+
+    {% if ott_platforms %}
+    <div class="ott-grid">
+      {% for platform in ott_platforms %}
+      <a
+        href="{{ platform.url }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="ott-card"
+      >
+        {% if platform.logo %}
+        <img
+          src="{{ platform.logo }}"
+          alt="{{ platform.name }} logo"
+          loading="lazy"
+        />
+        {% endif %}
+        <h3>{{ platform.name }}</h3>
+        <p>{{ platform.types }}</p>
+        <span class="ott-cta">Watch Now ↗</span>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if ott_justwatch_url %}
+    <a
+      href="{{ ott_justwatch_url }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="ott-all-link"
+    >
+      View all availability options ↗
+    </a>
+    {% endif %}
+    {% else %}
+    <div class="info-card ott-empty">
+      No OTT release information is available for this movie yet. Check back
+      soon.
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- =====================================================
+     AI ANALYSIS
+===================================================== -->
+<section class="section">
+  <div class="glass-panel">
+    <div class="section-tag">LUMINARECS AI</div>
+    <h2 class="section-title">Recommendation Analysis</h2>
+
+    <div class="ai-grid">
+      <div class="ai-card">
+        <div class="ai-score">{{ confidence|default:"96" }}%</div>
+        <div class="ai-label">Recommendation Confidence</div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-score">{{ audience_match|default:"95" }}%</div>
+        <div class="ai-label">Audience Match</div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-score">{{ visual_score|default:"9.5" }}</div>
+        <div class="ai-label">Visual Score</div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-score">{{ emotional_depth|default:"9.2" }}</div>
+        <div class="ai-label">Emotional Depth</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     FEATURED CAST
+===================================================== -->
+<section class="section">
+  <div class="glass-panel">
+    <div class="section-tag">CAST & CREW</div>
+    <h2 class="section-title">Featured Cast</h2>
+
+    <div class="cast-grid">
+      {% for actor in cast %}
+
+      <a href="{% url 'actor_profile' actor.id %}" class="cast-card">
+        {% if actor.photo %}
+        <img src="{{ actor.photo }}" alt="{{ actor.name }}" />
+        {% else %}
+        <img src="{% static 'images/default-actor.svg' %}" alt="Actor" />
+        {% endif %}
+
+        <div class="cast-content">
+          <h3>{{ actor.name }}</h3>
+
+          <p>{{ actor.character }}</p>
+        </div>
+      </a>
+
+      {% empty %}
+
+      <div class="info-card">Cast information unavailable.</div>
+
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     TRAILER
+===================================================== -->
+<section class="section" id="trailer">
+  <div class="glass-panel">
+    <div class="section-tag">OFFICIAL TRAILER</div>
+    <h2 class="section-title">Watch Trailer</h2>
+
+    <div class="trailer">
+      {% if movie.trailer_key %}
+      <iframe
+        src="https://www.youtube.com/embed/{{ movie.trailer_key }}"
+        title="{{ movie.title }} Trailer"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+          web-share;
+        "
+        allowfullscreen
+      >
+      </iframe>
+      {% else %}
+      <div class="info-card">Trailer unavailable.</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     SIMILAR MOVIES
+===================================================== -->
+<section class="section">
+  <div class="glass-panel">
+    <div class="section-tag">MORE CINEMA</div>
+    <h2 class="section-title">Similar Movies</h2>
+
+    <div class="movie-grid">
+      {% for similar in similar_movies %}
+      <a href="{% url 'movie_details' similar.id %}" class="movie-card">
+        <div class="movie-poster">
+          {% if similar.poster_url %}
+          <img src="{{ similar.poster_url }}" alt="{{ similar.title }}" />
+          {% else %}
+          <img
+            src="{% static 'images/default-poster.svg' %}"
+            alt="Default Poster"
+          />
+          {% endif %}
+        </div>
+        <div class="movie-name">{{ similar.title }}</div>
+        <div class="movie-genre">{{ similar.genre.name|default:"Cinema" }}</div>
+      </a>
+      {% empty %}
+      <div class="info-card">No similar movies found.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     REVIEWS
+===================================================== -->
+<section class="section">
+  <div class="glass-panel">
+    <div class="section-tag">AUDIENCE REVIEWS</div>
+    <h2 class="section-title">Reviews & Reactions</h2>
+
+    <div class="review-box">
+      {% if user.is_authenticated %}
+      <form method="POST" class="review-form">
+        {% csrf_token %}
+        <select name="rating" class="review-select" required>
+          <option value="">Select Rating</option>
+          <option value="10">⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐ 10/10</option>
+          <option value="8">⭐⭐⭐⭐⭐⭐⭐⭐ 8/10</option>
+          <option value="6">⭐⭐⭐⭐⭐⭐ 6/10</option>
+          <option value="5">⭐⭐⭐⭐⭐ 5/10</option>
+          <option value="3">⭐⭐⭐ 3/10</option>
+          <option value="1">⭐ 1/10</option>
+        </select>
+
+        <textarea
+          name="comment"
+          class="review-textarea"
+          placeholder="Share your thoughts..."
+          required
+        ></textarea>
+
+        <button type="submit" class="review-submit">Submit Review</button>
+      </form>
+      {% else %}
+      <div class="info-card">Login to write a review.</div>
+      {% endif %} {% for review in reviews %}
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-user">{{ review.user.username }}</div>
+          <div class="review-rating">⭐ {{ review.rating }}/10</div>
+        </div>
+        <p class="review-text">{{ review.comment }}</p>
+      </div>
+      {% empty %}
+      <div class="info-card">No reviews yet. Be the first one.</div>
+      {% endfor %}
+      <div class="meta">⭐ {{ average_rating|floatformat:1 }}/10</div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     AI REASON
+===================================================== -->
+<section class="section">
+  <div class="glass-panel">
+    <div class="ai-explanation">
+      <h3>Why LuminaRecs Recommended This Movie</h3>
+      <p>{{ recommendation_reason }}</p>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     COLLECTIONS
+===================================================== -->
+<section class="section">
+  <div class="glass-panel">
+    <div class="section-tag">CURATED COLLECTIONS</div>
+    <h2 class="section-title">Movie Collections</h2>
+
+    <div class="collection-grid">
+      <div class="collection-card">
+        <h3>🏆 Award Winners</h3>
+        <p>Critically acclaimed cinematic masterpieces.</p>
+      </div>
+
+      <div class="collection-card">
+        <h3>🚀 Sci-Fi Universe</h3>
+        <p>Future worlds and advanced technology.</p>
+      </div>
+
+      <div class="collection-card">
+        <h3>🎭 Emotional Cinema</h3>
+        <p>Powerful human stories.</p>
+      </div>
+
+      <div class="collection-card">
+        <h3>🌌 Epic Adventures</h3>
+        <p>Large scale cinematic journeys.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     AI CINEMA ANALYTICS
+===================================================== -->
+<section class="section">
+  <div class="glass-panel">
+    <div class="section-tag">LUMINARECS INTELLIGENCE</div>
+    <h2 class="section-title">Cinema Analytics</h2>
+    <p class="section-subtitle">
+      Machine learning analysis based on millions of cinematic patterns.
+    </p>
+
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <div class="analytics-icon">🎯</div>
+        <div class="analytics-value">{{ confidence|default:"96" }}%</div>
+        <div class="analytics-title">Recommendation Accuracy</div>
+      </div>
+
+      <div class="analytics-card">
+        <div class="analytics-icon">👥</div>
+        <div class="analytics-value">{{ audience_match|default:"94" }}%</div>
+        <div class="analytics-title">Audience Similarity</div>
+      </div>
+
+      <div class="analytics-card">
+        <div class="analytics-icon">🧠</div>
+        <div class="analytics-value">{{ story_complexity|default:"High" }}</div>
+        <div class="analytics-title">Story Intelligence</div>
+      </div>
+
+      <div class="analytics-card">
+        <div class="analytics-icon">🎨</div>
+        <div class="analytics-value">{{ visual_score|default:"9.5" }}/10</div>
+        <div class="analytics-title">Visual Experience</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     LUMINARECS ENGINE
+===================================================== -->
+<section class="section engine-section">
+  <div class="engine-box">
+    <h2>LuminaRecs AI Cinema Engine</h2>
+    <p>
+      LuminaRecs combines machine learning, movie metadata analysis, user
+      behaviour, watch history and audience preferences to discover cinematic
+      experiences tailored specifically for you.
+    </p>
+  </div>
+</section>
+
+<script>
+
+function getCookie(name){
+
+    let cookieValue = null;
+
+    if(document.cookie && document.cookie !== ""){
+
+        const cookies = document.cookie.split(";");
+
+        for(let i=0;i<cookies.length;i++){
+
+            const cookie = cookies[i].trim();
+
+            if(cookie.substring(0,name.length+1) === (name+"=")){
+
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length+1)
+                );
+
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+
+const csrftoken =
+  document.querySelector('meta[name="csrf-token"]')?.content ||
+  getCookie("csrftoken");
+
+
+
+document.querySelectorAll(".feedback-btn").forEach(button=>{
+
+
+    button.addEventListener("click",function(){
+
+
+        const movieId = this.dataset.movieId;
+
+        const action = this.dataset.action;
+
+
+        sendFeedback(movieId,action);
+
+
+    });
+
+
+});
+
+
+
+
+
+function sendFeedback(movieId,action){
+
+
+    fetch(`/feedback/${movieId}/`,
+    {
+
+
+        method:"POST",
+
+
+        headers:{
+
+
+            "X-CSRFToken":csrftoken,
+
+
+            "Content-Type":
+            "application/x-www-form-urlencoded"
+
+        },
+
+
+        body:new URLSearchParams({
+
+            action:action
+
+        })
+
+    })
+
+
+    .then(response=>{
+
+
+        if(!response.ok){
+
+            throw new Error(
+                "HTTP Error "+response.status
+            );
+
+        }
+
+
+        return response.json();
+
+
+    })
+
+
+    .then(data=>{
+
+
+        console.log(data);
+
+
+        document.getElementById(
+            "feedback-message"
+        ).innerHTML =
+        "✨ "+data.message;
+
+
+    })
+
+
+    .catch(error=>{
+
+
+        console.error(
+            "Feedback Error:",
+            error
+        );
+
+
+        document.getElementById(
+            "feedback-message"
+        ).innerHTML =
+        "❌ Something went wrong";
+
+
+    });
+
+
+}
+
+
+</script>
+
+
+
+
+{% endblock %}\

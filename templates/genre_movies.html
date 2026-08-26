@@ -1,0 +1,582 @@
+{% extends 'base.html' %} {% load static %} {% block title %} {{ title }} •
+LuminaRecs {% endblock %} {% block extra_css %}
+<style>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  /* =====================================================
+     LUMINARECS GENRE MOVIES PAGE
+     CINEMATIC COLLECTION DESIGN STYLES
+  ===================================================== */
+
+  .genre-wrapper {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* HERO SECTION */
+  .genre-hero {
+    padding: 170px 70px 80px;
+    min-height: 45vh;
+    text-align: center;
+    background:
+      linear-gradient(rgba(2, 3, 7, 0.85), rgba(2, 3, 7, 0.98)),
+      url("{% static 'images/cinema-bg.svg' %}");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .genre-tag {
+    color: var(--prestige-gold, #c39b34);
+    font-size: 12px;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .genre-title {
+    font-family: "Cinzel", serif;
+    color: white;
+    font-size: clamp(2rem, 6vw, 4rem);
+    margin-bottom: 20px;
+  }
+
+  .genre-description {
+    max-width: 750px;
+    margin: auto;
+    color: #cbd5e1;
+    line-height: 2;
+    font-size: 1.05rem;
+  }
+
+  /* CONTENT SECTION */
+  .genre-content {
+    padding: 80px 70px;
+  }
+
+  .genre-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 50px;
+  }
+
+  .genre-heading {
+    font-family: "Cinzel", serif;
+    color: white;
+    font-size: 2.5rem;
+  }
+
+  .genre-count {
+    color: var(--prestige-gold, #c39b34);
+    background: rgba(195, 155, 52, 0.1);
+    border: 1px solid rgba(195, 155, 52, 0.3);
+    padding: 12px 22px;
+    border-radius: 8px;
+  }
+
+  /* BACK BUTTON */
+  .back-btn {
+    display: inline-block;
+    margin-bottom: 35px;
+    padding: 12px 25px;
+    color: white;
+    text-decoration: none;
+    background: rgba(6, 9, 20, 0.8);
+    border: 1px solid rgba(195, 155, 52, 0.5);
+    border-radius: 8px;
+    transition: 0.4s;
+  }
+
+  .back-btn:hover {
+    background: var(--prestige-gold, #c39b34);
+    color: black;
+    transform: translateY(-5px);
+  }
+
+  /* MOVIE GRID */
+  .movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 35px;
+  }
+
+  .movie-card {
+    text-decoration: none;
+    color: white;
+    transition: 0.5s;
+    display: block;
+  }
+
+  .movie-card:hover {
+    transform: translateY(-6px);
+  }
+
+  /* POSTER */
+  .poster-box {
+    position: relative;
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    background: #060914;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+  }
+
+  .poster-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.6s;
+  }
+
+  .movie-card:hover img {
+    transform: scale(1.08);
+  }
+
+  /* MOVIE OVERLAY */
+  .movie-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.95));
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 25px;
+    opacity: 0;
+    transition: 0.4s;
+  }
+
+  .movie-card:hover .movie-overlay {
+    opacity: 1;
+  }
+
+  .view-btn {
+    padding: 10px 22px;
+    background: var(--prestige-gold, #c39b34);
+    color: black;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 6px;
+  }
+
+  /* WISHLIST BUTTON */
+  .wishlist-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 1.2rem;
+    backdrop-filter: blur(10px);
+    transition: 0.4s;
+    z-index: 5;
+  }
+
+  .wishlist-btn:hover {
+    background: var(--prestige-gold, #c39b34);
+    color: black;
+    transform: scale(1.1);
+  }
+
+  /* MOVIE INFORMATION */
+  .movie-info {
+    padding-top: 18px;
+  }
+
+  .movie-title {
+    font-family: "Cinzel", serif;
+    font-size: 1.25rem;
+    color: white;
+    margin-bottom: 8px;
+    white-space: normal;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    min-height: 52px;
+    text-overflow: ellipsis;
+  }
+
+  .movie-meta {
+    display: flex;
+    gap: 12px;
+    color: #9ca3af;
+    font-size: 0.9rem;
+  }
+
+  .meta-divider {
+    color: var(--prestige-gold, #c39b34);
+  }
+
+  /* GENRE BADGE */
+  .genre-badge {
+    position: absolute;
+    left: 15px;
+    bottom: 15px;
+    background: rgba(0, 0, 0, 0.75);
+    color: var(--prestige-gold, #c39b34);
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+    border-radius: 6px;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 40px;
+    background: rgba(6, 9, 20, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 25px;
+  }
+
+  .empty-title {
+    font-family: "Cinzel", serif;
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+
+  .empty-text {
+    color: #9ca3af;
+    line-height: 1.8;
+  }
+
+  /* DISCOVER MORE SECTION */
+  .discover-more {
+    padding: 0 70px 80px;
+  }
+
+  .discover-box {
+    background: rgba(6, 9, 20, 0.85);
+    border: 1px solid rgba(195, 155, 52, 0.25);
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+  }
+
+  .discover-tag {
+    color: var(--prestige-gold, #c39b34);
+    font-size: 12px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+  }
+
+  .discover-box h2 {
+    font-family: "Cinzel", serif;
+    color: white;
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+  }
+
+  .discover-box p {
+    color: #cbd5e1;
+    margin-bottom: 30px;
+  }
+
+  .discover-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .discover-btn {
+    padding: 14px 30px;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: 0.35s;
+  }
+
+  .discover-btn.primary {
+    background: var(--prestige-gold, #c39b34);
+    color: black;
+  }
+
+  .discover-btn.outline {
+    border: 1px solid rgba(195, 155, 52, 0.5);
+    color: white;
+  }
+
+  .discover-btn:hover {
+    transform: translateY(-4px);
+  }
+
+  /* ==========================
+   PAGINATION
+========================== */
+
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 60px;
+    flex-wrap: wrap;
+  }
+
+  .page-btn {
+    padding: 12px 24px;
+    background: rgba(6, 9, 20, 0.9);
+    border: 1px solid rgba(195, 155, 52, 0.35);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .page-btn:hover {
+    background: #c39b34;
+    color: #000;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(195, 155, 52, 0.3);
+  }
+
+  .page-current {
+    color: #c39b34;
+    font-family: "Cinzel", serif;
+    font-size: 1rem;
+    padding: 12px 18px;
+    background: rgba(195, 155, 52, 0.08);
+    border: 1px solid rgba(195, 155, 52, 0.2);
+    border-radius: 10px;
+  }
+
+  /* RESPONSIVE DESIGN */
+  @media (max-width: 1200px) {
+    .genre-title {
+      font-size: 3.5rem;
+    }
+    .genre-content,
+    .discover-more {
+      padding: 0 50px 70px;
+    }
+  }
+
+  @media (max-width: 992px) {
+    .genre-hero {
+      padding: 130px 35px 70px;
+    }
+    .genre-content,
+    .discover-more {
+      padding: 60px 35px;
+    }
+    .genre-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .genre-heading {
+      font-size: 2.2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .genre-hero {
+      padding: 160px 20px 60px;
+      min-height: 35vh;
+    }
+    .genre-title {
+      font-size: 2.5rem;
+    }
+    .genre-description {
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+    .genre-content,
+    .discover-more {
+      padding: 0 20px 50px;
+    }
+    .movie-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .movie-title {
+      font-size: 1rem;
+    }
+    .movie-meta {
+      font-size: 0.8rem;
+    }
+    .wishlist-btn {
+      width: 48px;
+      height: 48px;
+      font-size: 1.3rem;
+    }
+    .genre-count {
+      width: 100%;
+      text-align: center;
+    }
+    .pagination-container {
+      gap: 10px;
+      margin-top: 40px;
+    }
+
+    .page-btn {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+    }
+
+    .page-current {
+      width: 100%;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .genre-title {
+      font-size: 2rem;
+    }
+    .movie-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .genre-heading {
+      font-size: 1.8rem;
+    }
+    .page-btn {
+      flex: 1;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .page-current {
+      order: -1;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .movie-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="genre-wrapper">
+  <section class="genre-hero">
+    <div class="genre-tag">DISCOVER CINEMA</div>
+    <h1 class="genre-title">{{ title }}</h1>
+    <p class="genre-description">{{ description }}</p>
+  </section>
+
+  <section class="genre-content">
+    <a href="javascript:history.back()" class="back-btn"> ← Back </a>
+
+    <div class="genre-header">
+      <h2 class="genre-heading">{{ title }} Movies</h2>
+      <div class="genre-count">{{ page_obj.paginator.count }} Movies</div>
+    </div>
+
+    <div class="movie-grid">
+      {% for movie in movies %}
+      <div class="movie-card">
+        <div class="poster-box">
+          <form method="post" action="{% url 'add_to_wishlist' movie.id %}">
+            {% csrf_token %}
+            <button type="submit" class="wishlist-btn" title="Add to Wishlist">♥</button>
+          </form>
+
+          <a href="{% url 'movie_details' movie.id %}">
+            {% if movie.poster_url %}
+            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
+            {% else %}
+            <img
+              src="{% static 'images/default-poster.svg' %}"
+              alt="{{ movie.title }}"
+            />
+            {% endif %}
+
+            <div class="genre-badge">{{ title }}</div>
+
+            <div class="movie-overlay">
+              <span class="view-btn">View Movie</span>
+            </div>
+          </a>
+        </div>
+
+        <a
+          href="{% url 'movie_details' movie.id %}"
+          style="text-decoration: none"
+        >
+          <div class="movie-info">
+            <h3 class="movie-title">{{ movie.title }}</h3>
+            <div class="movie-meta">
+              <span>{{ movie.release_year }}</span>
+              <span class="meta-divider">•</span>
+              <span>{{ movie.genre|default:title }}</span>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <div class="empty-icon">🎬</div>
+        <div class="empty-title">No Movies Found</div>
+        <div class="empty-text">
+          We could not find any movies in this collection. Try exploring another
+          cinematic universe.
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div class="pagination-container">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+        ← Previous
+      </a>
+      {% endif %}
+
+      <span class="page-current">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+        Next →
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="discover-more">
+    <div class="discover-box">
+      <div class="discover-tag">KEEP EXPLORING</div>
+      <h2>Discover More Cinematic Worlds</h2>
+      <p>Explore other genres and find your next favourite movie.</p>
+
+      <div class="discover-buttons">
+        <a href="{% url 'discover' %}" class="discover-btn primary">
+          Explore All Movies
+        </a>
+        <a href="{% url 'homepage' %}" class="discover-btn outline">
+          Back Home
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

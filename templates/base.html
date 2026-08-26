@@ -1,0 +1,1194 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{% block title %}LuminaRecs{% endblock %}</title>
+
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+            /* =====================================================
+               LUMINARECS CINEMATIC DESIGN SYSTEM
+            ===================================================== */
+            :root {
+              --cinema-black: #020307;
+              --film-emulsion: #060914;
+              --prestige-gold: #c39b34;
+              --prestige-light: #e6c15c;
+              --text: #d1d5db;
+              --muted: #8d95a3;
+              --border: rgba(255, 255, 255, 0.08);
+              --glass: rgba(6, 9, 20, 0.82);
+              --container: 1400px;
+              --transition: all .45s cubic-bezier(.16, 1, .3, 1);
+            }
+
+            /* =====================================================
+               RESET
+            ===================================================== */
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+
+            html {
+              scroll-behavior: smooth;
+              width: 100%;
+              max-width: 100%;
+              overflow-x: hidden;
+            }
+
+            body {
+              background: var(--cinema-black);
+              color: var(--text);
+              font-family: 'Inter', sans-serif;
+              overflow-x: hidden;
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
+            }
+
+            img {
+              max-width: 100%;
+              display: block;
+            }
+
+            a {
+              color: inherit;
+            }
+
+            /* =====================================================
+               FILM GRAIN
+            ===================================================== */
+            .film-grain {
+              position: fixed;
+              inset: 0;
+              pointer-events: none;
+              z-index: 9999;
+              opacity: .05;
+              background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            }
+
+            /* =====================================================
+               CINEMA MATTE BARS
+            ===================================================== */
+            .matte-top,
+            .matte-bottom {
+              position: fixed;
+              left: 0;
+              width: 100%;
+              height: 50px;
+              background: #000;
+              z-index: 9000;
+            }
+
+            .matte-top {
+              top: 0;
+            }
+
+            .matte-bottom {
+              bottom: 0;
+            }
+
+            /* =====================================================
+               PROJECTOR LIGHT EFFECT
+            ===================================================== */
+            .projector-lens {
+              position: fixed;
+              inset: 0;
+              pointer-events: none;
+              z-index: 1;
+              background:
+                radial-gradient(circle at center, transparent 25%, rgba(2, 3, 7, .85) 80%),
+                radial-gradient(circle at 20% 30%, rgba(0, 110, 255, .05), transparent 45%),
+                radial-gradient(circle at 80% 70%, rgba(195, 155, 52, .04), transparent 40%);
+            }
+
+            /* =====================================================
+               NAVBAR
+            ===================================================== */
+            .navbar {
+              position: fixed;
+              top: 50px;
+              left: 0;
+              width: 100%;
+              height: 90px;
+              padding: 0 70px;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              z-index: 9500;
+              background: linear-gradient(to bottom, rgba(2, 3, 7, .95), rgba(2, 3, 7, .55));
+              backdrop-filter: blur(20px);
+              border-bottom: 1px solid rgba(255, 255, 255, .05);
+            }
+
+            /* LOGO */
+            .logo {
+              text-decoration: none;
+              font-family: 'Cinzel', serif;
+              font-size: 2rem;
+              font-weight: 700;
+              letter-spacing: .03em;
+              color: white;
+            }
+
+            .logo span {
+              color: var(--prestige-gold);
+            }
+
+            /* NAV LINKS */
+            .nav-links {
+              display: flex;
+              align-items: center;
+              gap: 32px;
+            }
+
+            .nav-links a {
+              position: relative;
+              text-decoration: none;
+              font-size: .95rem;
+              color: #9ca3af;
+              transition: .3s;
+            }
+
+            .nav-links a:hover {
+              color: white;
+            }
+
+            /* ACTIVE LINK */
+            .nav-active {
+              color: white !important;
+              font-weight: 600;
+            }
+
+            .nav-active::after {
+              content: "";
+              position: absolute;
+              left: 0;
+              bottom: -12px;
+              width: 100%;
+              height: 2px;
+              background: var(--prestige-gold);
+            }
+
+            /* LOGOUT BUTTON */
+            .logout-btn {
+              padding: 12px 26px;
+              border: 1px solid rgba(195, 155, 52, .4);
+              color: white !important;
+            }
+
+            .logout-btn:hover {
+              background: var(--prestige-gold);
+              color: black !important;
+            }
+
+            /* MOBILE NAVBAR BUTTON */
+            .menu-toggle {
+              display: none;
+              font-size: 1.8rem;
+              color: white;
+              cursor: pointer;
+            }
+
+            /* =====================================================
+               MAIN CONTENT
+            ===================================================== */
+            main {
+              position: relative;
+              z-index: 5;
+              flex: 1;
+            }
+
+            .page-container {
+              width: 100%;
+              max-width: var(--container);
+              margin: auto;
+            }
+
+            .glass-panel {
+              background: rgba(6, 9, 20, 0.82);
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              backdrop-filter: blur(22px);
+              -webkit-backdrop-filter: blur(22px);
+              box-shadow: 0 30px 80px rgba(2, 3, 7, 0.55);
+            }
+
+            .eyebrow {
+              color: var(--prestige-gold);
+              font-size: 11px;
+              letter-spacing: .35em;
+              text-transform: uppercase;
+              margin-bottom: 18px;
+            }
+
+            .btn {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              gap: 10px;
+              min-height: 52px;
+              padding: 0 28px;
+              border: 1px solid transparent;
+              border-radius: 14px;
+              text-decoration: none;
+              text-transform: uppercase;
+              letter-spacing: .12em;
+              font-size: .72rem;
+              font-weight: 600;
+              transition: var(--transition);
+              cursor: pointer;
+            }
+
+            .btn-primary {
+              background: var(--prestige-gold);
+              color: #020307;
+              box-shadow: 0 16px 35px rgba(195, 155, 52, 0.28);
+            }
+
+            .btn-primary:hover {
+              background: var(--prestige-light);
+              transform: translateY(-3px);
+            }
+
+            .btn-secondary {
+              background: transparent;
+              color: white;
+              border-color: rgba(195, 155, 52, 0.38);
+            }
+
+            .btn-secondary:hover {
+              background: rgba(195, 155, 52, 0.08);
+              border-color: rgba(195, 155, 52, 0.8);
+              transform: translateY(-3px);
+            }
+
+            /* =====================================================
+               GLOBAL SECTION SYSTEM
+            ===================================================== */
+            .section {
+              padding: 100px 70px;
+            }
+
+            .section-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+              margin-bottom: 50px;
+              padding-bottom: 25px;
+              border-bottom: 1px solid rgba(255, 255, 255, .06);
+            }
+
+            .section-tag {
+              color: var(--prestige-gold);
+              font-size: 11px;
+              letter-spacing: .35em;
+              text-transform: uppercase;
+              margin-bottom: 15px;
+            }
+
+            .section-title {
+              font-family: 'Cinzel', serif;
+              font-size: 2.8rem;
+              color: white;
+              line-height: 1.2;
+            }
+
+            .section-subtitle {
+              color: var(--muted);
+              margin-top: 15px;
+              line-height: 1.8;
+              max-width: 700px;
+            }
+
+            /* =====================================================
+               HERO COMMON STYLE
+            ===================================================== */
+            .hero {
+              position: relative;
+              min-height: 90vh;
+              display: flex;
+              align-items: center;
+            }
+
+            .small-hero {
+              min-height: 60vh;
+            }
+
+            /* =====================================================
+               GLASSMORPHISM SYSTEM
+            ===================================================== */
+            .glass-card {
+              background: rgba(6, 9, 20, .82);
+              backdrop-filter: blur(25px);
+              border: 1px solid rgba(255, 255, 255, .08);
+              transition: var(--transition);
+            }
+
+            .glass-card:hover {
+              border-color: var(--prestige-gold);
+              transform: translateY(-8px);
+            }
+
+            /* =====================================================
+               BUTTON SYSTEM
+            ===================================================== */
+            .btn {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              padding: 16px 35px;
+              text-decoration: none;
+              font-size: .75rem;
+              font-weight: 600;
+              letter-spacing: .15em;
+              text-transform: uppercase;
+              transition: .4s;
+              cursor: pointer;
+            }
+
+            .btn-primary {
+              background: var(--prestige-gold);
+              color: black;
+            }
+
+            .btn-primary:hover {
+              background: var(--prestige-light);
+              transform: translateY(-5px);
+              box-shadow: 0 15px 40px rgba(195, 155, 52, .35);
+            }
+
+            .btn-outline {
+              border: 1px solid rgba(195, 155, 52, .5);
+              color: white;
+            }
+
+            .btn-outline:hover {
+              background: var(--prestige-gold);
+              color: black;
+            }
+
+            /* =====================================================
+               MOVIE CARD SYSTEM
+            ===================================================== */
+            .movie-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+              gap: 35px;
+            }
+
+            .movie-card {
+              text-decoration: none;
+              color: white;
+              background: rgba(6, 9, 20, .75);
+              border: 1px solid rgba(255, 255, 255, .08);
+              overflow: hidden;
+              transition: var(--transition);
+            }
+
+            .movie-card:hover {
+              transform: translateY(-12px);
+              border-color: var(--prestige-gold);
+            }
+
+            .movie-poster-wrapper {
+              position: relative;
+              aspect-ratio: 2/3;
+              overflow: hidden;
+              background: var(--film-emulsion);
+            }
+
+            .movie-poster-wrapper img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              transition: .6s;
+            }
+
+            .movie-card:hover img {
+              transform: scale(1.08);
+            }
+
+            .movie-overlay {
+              position: absolute;
+              inset: 0;
+              display: flex;
+              align-items: flex-end;
+              justify-content: center;
+              padding-bottom: 25px;
+              background: linear-gradient(transparent, rgba(0, 0, 0, .9));
+              opacity: 0;
+              transition: .4s;
+            }
+
+            .movie-card:hover .movie-overlay {
+              opacity: 1;
+            }
+
+            .match-score {
+              background: var(--prestige-gold);
+              color: black;
+              padding: 10px 18px;
+              font-weight: 700;
+              font-size: .8rem;
+            }
+
+            .movie-info {
+              padding: 20px;
+            }
+
+            .movie-title {
+              font-family: 'Cinzel', serif;
+              font-size: 1.15rem;
+              color: white;
+              margin-bottom: 8px;
+            }
+
+            .movie-meta {
+              font-size: .9rem;
+              color: #9ca3af;
+            }
+
+            /* =====================================================
+               BADGES
+            ===================================================== */
+            .rank-badge {
+              position: absolute;
+              top: 15px;
+              left: 15px;
+              padding: 8px 14px;
+              background: rgba(0, 0, 0, .8);
+              color: white;
+              backdrop-filter: blur(10px);
+              font-size: .85rem;
+            }
+
+            /* =====================================================
+               GRID SYSTEM
+            ===================================================== */
+            .grid-2 {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+              gap: 35px;
+            }
+
+            .grid-3 {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+              gap: 35px;
+            }
+
+            .grid-4 {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+              gap: 30px;
+            }
+
+            /* =====================================================
+               FEATURE CARDS
+            ===================================================== */
+            .feature-card {
+              padding: 35px;
+              background: rgba(6, 9, 20, .82);
+              border: 1px solid rgba(255, 255, 255, .08);
+              transition: var(--transition);
+            }
+
+            .feature-card:hover {
+              border-color: var(--prestige-gold);
+              transform: translateY(-10px);
+            }
+
+            .feature-icon {
+              font-size: 2rem;
+              margin-bottom: 20px;
+            }
+
+            .feature-title {
+              font-family: 'Cinzel', serif;
+              color: white;
+              margin-bottom: 15px;
+            }
+
+            .feature-text {
+              color: #9ca3af;
+              line-height: 1.8;
+            }
+
+            /* =====================================================
+               EMPTY STATE
+            ===================================================== */
+            .empty-card {
+              padding: 50px;
+              text-align: center;
+              background: rgba(6, 9, 20, .8);
+              border: 1px solid rgba(255, 255, 255, .08);
+              color: #9ca3af;
+              grid-column: 1/-1;
+            }
+
+            /* =====================================================
+               FOOTER SYSTEM
+            ===================================================== */
+            .footer {
+              margin-top: 120px;
+              padding: 90px 70px;
+              text-align: center;
+              border-top: 1px solid rgba(255, 255, 255, .06);
+              background: linear-gradient(to top, rgba(6, 9, 20, .95), transparent);
+              position: relative;
+              z-index: 5;
+            }
+
+            .footer-logo {
+              font-family: 'Cinzel', serif;
+              font-size: 2.2rem;
+              font-weight: 700;
+              color: white;
+            }
+
+            .footer-logo span {
+              color: var(--prestige-gold);
+            }
+
+            .footer-description {
+              max-width: 800px;
+              margin: 25px auto;
+              color: #9ca3af;
+              line-height: 2;
+            }
+
+            .footer-links {
+              display: flex;
+              justify-content: center;
+              flex-wrap: wrap;
+              gap: 35px;
+              margin-top: 35px;
+            }
+
+            .footer-links a {
+              text-decoration: none;
+              color: #9ca3af;
+              transition: .3s;
+            }
+
+            .footer-links a:hover {
+              color: white;
+            }
+
+            .footer-copy {
+              margin-top: 40px;
+              font-size: .9rem;
+              color: #6b7280;
+            }
+
+            /* =====================================================
+               FORM SYSTEM
+            ===================================================== */
+            .form-container {
+              width: 100%;
+              max-width: 500px;
+              margin: auto;
+              padding: 45px;
+              background: rgba(6, 9, 20, .85);
+              backdrop-filter: blur(20px);
+              border: 1px solid rgba(255, 255, 255, .08);
+            }
+
+            .form-title {
+              font-family: 'Cinzel', serif;
+              font-size: 2.5rem;
+              color: white;
+              text-align: center;
+              margin-bottom: 35px;
+            }
+
+            .form-group {
+              margin-bottom: 22px;
+            }
+
+            .form-label {
+              display: block;
+              margin-bottom: 8px;
+              font-size: .85rem;
+              color: #cbd5e1;
+            }
+
+            .form-input {
+              width: 100%;
+              padding: 16px;
+              background: rgba(255, 255, 255, .04);
+              border: 1px solid rgba(255, 255, 255, .1);
+              color: white;
+              outline: none;
+              transition: .3s;
+            }
+
+            .form-input:focus {
+              border-color: var(--prestige-gold);
+            }
+
+            .form-button {
+              width: 100%;
+              margin-top: 15px;
+            }
+            .menu-overlay{
+          position:fixed;
+          inset:0;
+          background:rgba(0,0,0,.65);
+          backdrop-filter:blur(3px);
+
+          opacity:0;
+          visibility:hidden;
+
+          transition:.3s;
+          z-index:99998;
+      }
+
+      .menu-overlay.active{
+          opacity:1;
+          visibility:visible;
+      }
+            /* =====================================================
+               AUTH SOCIAL BUTTONS
+            ===================================================== */
+            .social-login {
+              display: flex;
+              gap: 15px;
+              margin-top: 25px;
+            }
+
+            .social-btn {
+              flex: 1;
+              padding: 14px;
+              text-align: center;
+              text-decoration: none;
+              border: 1px solid rgba(255, 255, 255, .1);
+              color: white;
+              background: rgba(255, 255, 255, .04);
+              transition: .3s;
+            }
+
+            .social-btn:hover {
+              border-color: var(--prestige-gold);
+            }
+
+            /* =====================================================
+               SEARCH SYSTEM
+            ===================================================== */
+            .search-panel {
+              padding: 45px;
+            }
+
+            .search-form {
+              display: flex;
+              gap: 15px;
+              max-width: 850px;
+              margin: auto;
+            }
+
+            .search-input {
+              flex: 1;
+              padding: 18px 20px;
+              background: rgba(255, 255, 255, .04);
+              border: 1px solid rgba(255, 255, 255, .1);
+              color: white;
+              outline: none;
+            }
+
+            .search-input:focus {
+              border-color: var(--prestige-gold);
+            }
+
+            .search-button {
+              padding: 18px 35px;
+            }
+
+            /* =====================================================
+               CONTINUE WATCHING
+            ===================================================== */
+            .continue-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+              gap: 35px;
+            }
+
+            .watch-card {
+              background: rgba(6, 9, 20, .75);
+              border: 1px solid rgba(255, 255, 255, .08);
+              transition: var(--transition);
+            }
+
+            .watch-card:hover {
+              transform: translateY(-12px);
+              border-color: var(--prestige-gold);
+            }
+
+            .progress-track {
+              height: 6px;
+              background: rgba(255, 255, 255, .12);
+              overflow: hidden;
+              margin-top: 15px;
+            }
+
+            .progress-fill {
+              height: 100%;
+              background: var(--prestige-gold);
+            }
+
+            /* =====================================================
+               ANIMATION SYSTEM
+            ===================================================== */
+            .fade-up {
+              animation: fadeUp .8s ease forwards;
+            }
+
+            @keyframes fadeUp {
+              from {
+                opacity: 0;
+                transform: translateY(35px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+
+            .movie-card,
+            .watch-card,
+            .feature-card,
+            .glass-card {
+              animation: fadeUp .8s ease both;
+            }
+
+            @keyframes cinematicReveal {
+              from {
+                opacity: 0;
+                transform: translateY(40px) scale(.96);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+              }
+            }
+
+            /* =====================================================
+               LARGE SCREEN RESPONSIVE
+            ===================================================== */
+            @media(max-width:1400px) {
+              .navbar {
+                padding: 0 50px;
+              }
+
+              .section {
+                padding: 90px 50px;
+              }
+
+              .movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+              }
+
+              .grid-2 {
+                grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+              }
+            }
+
+            /* =====================================================
+               TABLET RESPONSIVE
+            ===================================================== */
+            @media(max-width:992px) {
+              .navbar {
+                height: 80px;
+                padding: 0 30px;
+              }
+
+              .logo {
+                font-size: 1.7rem;
+              }
+
+              .nav-links {
+                gap: 18px;
+              }
+
+              .nav-links a {
+                font-size: .85rem;
+              }
+
+              .section {
+                padding: 75px 30px;
+              }
+
+              .section-title {
+                font-size: 2.2rem;
+              }
+
+              .movie-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 25px;
+              }
+
+              .grid-2,
+              .grid-3,
+              .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+              }
+
+              .footer {
+                padding: 70px 30px;
+              }
+
+              .search-form {
+                flex-direction: column;
+              }
+
+              .search-button {
+                width: 100%;
+              }
+            }
+
+            /* =====================================================
+               MOBILE RESPONSIVE SYSTEM
+            ===================================================== */
+            @media(max-width:768px) {
+              body {
+                overflow-x: hidden;
+              }
+
+              /* NAVBAR MOBILE */
+              .navbar {
+                top: 4vh;
+                height: 70px;
+                padding:0 20px;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+              }
+
+              .logo {
+                font-size: 1.4rem;
+              }
+              .menu-toggle{
+                position: relative;
+                z-index: 10000;
+                width: 48px;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(195, 155, 52, .4);
+                border-radius: 12px;
+                background: rgba(6, 9, 20, .85);
+              }
+              .menu-toggle:hover{
+                border-color: var(--prestige-gold);
+                color: var(--prestige-gold);
+              }
+              /* KEEP NAV OPTIONS VISIBLE */
+              .nav-links{
+                position:fixed;
+                top: 0;
+                right: -100%;
+                width: 100%;
+                height: 100vh;
+                background: linear-gradient(180deg, rgba(2,3,7,.98), rgba(6,9,20,.98));
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content:flex-start;
+                padding-top: 140px;
+                gap: 30px;
+                transition: .4s ease;
+                z-index: 9999;
+              }
+              .nav-links.active{
+                right: 0;
+              }
+              .nav-links a {
+                  font-family: "Cinzel", serif;
+                  font-size: 1.5rem;
+                  color: white;
+                  text-decoration: none;
+                  letter-spacing: .08em;
+                }
+                .nav-links a:hover{
+                  color: var(--prestige-gold);
+                  transform: translateX(8px);
+                }
+                .nav-links a::after{
+                  content: "";
+                  position: absolute;
+                  left: 0;
+                  bottom: -10px;
+                  width: 0;
+                  height: 2px;
+                  background: var(--prestige-gold);
+                  transition: .3s;
+                }
+                .nav-links a:hover::after{
+                  width: 100%;
+                }
+                .logout-btn {
+                  margin-top: 20px;
+                  padding: 14px 30px;
+                  border-radius: 10px;
+
+                }
+
+                .logout-btn:hover{
+                  background: var(--prestige-gold);
+                  color: black;
+                }
+
+                /* SECTIONS */
+                .section {
+                  padding: 60px 20px;
+                }
+
+                .section-header {
+                  flex-direction: column;
+                  align-items: flex-start;
+                  gap: 15px;
+                }
+
+                .section-title {
+                  font-size: 1.8rem;
+                }
+
+                .section-subtitle {
+                  font-size: .9rem;
+                }
+
+                /* MOVIE GRID */
+                .movie-grid {
+                  grid-template-columns: repeat(2, 1fr);
+                  gap: 15px;
+                }
+
+                .continue-grid {
+                  grid-template-columns: repeat(2, 1fr);
+                  gap: 15px;
+                }
+
+                .movie-info {
+                  padding: 12px;
+                }
+
+                .movie-title {
+                  font-size: .95rem;
+                }
+
+                .movie-meta {
+                  font-size: .8rem;
+                }
+
+                /* FORMS */
+                .form-container {
+                  padding: 30px 20px;
+                }
+
+                .form-title {
+                  font-size: 2rem;
+                }
+
+                /* SEARCH */
+                .search-panel {
+                  padding: 25px 20px;
+                }
+
+                /* FOOTER */
+                .footer {
+                  padding: 60px 20px;
+                  margin-top: 70px;
+                }
+
+                .footer-logo {
+                  font-size: 1.7rem;
+                }
+
+                .footer-description {
+                  font-size: .9rem;
+                }
+
+                .footer-links {
+                  flex-direction: column;
+                  gap: 15px;
+                }
+              }
+
+            /* =====================================================
+               SMALL PHONES
+            ===================================================== */
+            @media(max-width:480px) {
+              .navbar {
+                padding: 12px 15px;
+              }
+
+              .logo {
+                font-size: 1.3rem;
+              }
+
+              .nav-links {
+                gap: 10px;
+              }
+
+              .nav-links a {
+                font-size: 11px;
+              }
+
+              .section {
+                padding: 45px 15px;
+              }
+
+              .section-title {
+                font-size: 1.5rem;
+              }
+
+              .movie-grid,
+              .continue-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+              }
+
+              .movie-title {
+                font-size: .85rem;
+              }
+
+              .btn {
+                width: 100%;
+              }
+
+              .hero-buttons {
+                flex-direction: column;
+              }
+            }
+
+            /* =====================================================
+               VERY SMALL DEVICES
+            ===================================================== */
+            @media(max-width:360px) {
+              .movie-grid,
+              .continue-grid {
+                grid-template-columns: 1fr;
+              }
+
+              .logo {
+                font-size: 1.2rem;
+              }
+
+              .section-title {
+                font-size: 1.3rem;
+              }
+            }
+
+            {% block extra_css %}{% endblock %}
+    </style>
+    <meta name="csrf-token" content="{{ csrf_token }}" />
+  </head>
+
+  <body>
+    <div class="film-grain"></div>
+    <div class="matte-top"></div>
+    <div class="matte-bottom"></div>
+    <div class="projector-lens"></div>
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <nav class="navbar">
+      <a href="{% url 'homepage' %}" class="logo"> Lumina<span>Recs</span> </a>
+
+      <div class="menu-toggle" id="menuToggle">☰</div>
+
+      <div class="nav-links" id="navLinks">
+        <a
+          href="{% url 'homepage' %}"
+          class="{% if request.resolver_match.url_name == 'homepage' %}nav-active{% endif %}"
+        >
+          Home
+        </a>
+
+        <a
+          href="{% url 'discover' %}"
+          class="{% if request.resolver_match.url_name == 'discover' %}nav-active{% endif %}"
+        >
+          Discover
+        </a>
+
+        <a
+          href="{% url 'wishlist' %}"
+          class="{% if request.resolver_match.url_name == 'wishlist' %}nav-active{% endif %}"
+        >
+          Wishlist
+        </a>
+
+        <a
+          href="{% url 'profile' %}"
+          class="{% if request.resolver_match.url_name == 'profile' %}nav-active{% endif %}"
+        >
+          Profile
+        </a>
+
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      </div>
+    </nav>
+
+    <main>{% block content %} {% endblock %}</main>
+
+    <footer class="footer">
+      <div class="footer-logo">Lumina<span>Recs</span></div>
+
+      <p class="footer-description">
+        Discover extraordinary stories through artificial intelligence.
+        LuminaRecs learns your cinematic taste and delivers personalized
+        recommendations, hidden gems, and unforgettable movie experiences.
+      </p>
+
+      <div class="footer-links">
+        <a href="{% url 'homepage' %}">Home</a>
+        <a href="{% url 'discover' %}">Discover</a>
+        <a href="{% url 'wishlist' %}">Wishlist</a>
+        <a href="{% url 'profile' %}">Profile</a>
+      </div>
+
+      <div class="footer-copy">
+        © 2026 LuminaRecs • AI Movie Recommendation Platform
+      </div>
+    </footer>
+
+    {% block extra_js %} {% endblock %}
+  </body>
+  <script>
+    const menuToggle = document.getElementById("menuToggle");
+    const navLinks = document.getElementById("navLinks");
+
+    menuToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
+
+      if (navLinks.classList.contains("active")) {
+        menuToggle.innerHTML = "✕";
+        document.body.style.overflow = "hidden";
+      } else {
+        menuToggle.innerHTML = "☰";
+        document.body.style.overflow = "auto";
+      }
+    });
+
+    document.querySelectorAll("#navLinks a").forEach((link) => {
+      link.addEventListener("click", () => {
+        navLinks.classList.remove("active");
+        menuToggle.innerHTML = "☰";
+        document.body.style.overflow = "auto";
+      });
+    });
+  </script>
+</html>

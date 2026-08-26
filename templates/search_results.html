@@ -1,0 +1,937 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Search Results • LuminaRecs
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ==========================================================
+     LUMINARECS SEARCH RESULTS V3
+     CINEMATIC AI DISCOVERY INTERFACE STYLES
+  ========================================================== */
+
+  :root {
+    --gold: #c39b34;
+    --gold-light: #e5c45c;
+    --black: #020307;
+    --film: #060914;
+    --surface: rgba(6, 9, 20, .85);
+    --border: rgba(255, 255, 255, .08);
+    --text: #d1d5db;
+    --muted: #9ca3af;
+  }
+
+  /* PAGE GLOBAL */
+  .search-page {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* BACK BUTTON */
+  .back-wrapper {
+    padding: 120px 20px 0;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 26px;
+    color: white;
+    text-decoration: none;
+    border: 1px solid rgba(195, 155, 52, .5);
+    background: rgba(6, 9, 20, .85);
+    backdrop-filter: blur(15px);
+    font-size: .85rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    transition: .4s;
+    border-radius: 8px;
+  }
+
+  .back-btn:hover {
+    background: var(--gold);
+    color: black;
+    transform: translateY(-5px);
+  }
+
+  /* HERO SECTION */
+  .search-hero {
+    min-height: 65vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 180px;
+    position: relative;
+    background: linear-gradient(rgba(2, 3, 7, .75), rgba(2, 3, 7, .96)),
+                url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1800&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .search-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, transparent 20%, rgba(2, 3, 7, .95));
+  }
+
+  .search-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 950px;
+    animation: searchReveal 1.2s ease;
+  }
+
+  @keyframes searchReveal {
+    from {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .search-tag {
+    color: var(--gold);
+    font-size: 12px;
+    letter-spacing: .45em;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+  }
+
+  .search-title {
+    font-family: "Cinzel", serif;
+    font-size: clamp(3rem, 6vw, 5rem);
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 25px;
+  }
+
+  .search-title span {
+    color: var(--gold);
+  }
+
+  .search-description {
+    max-width: 750px;
+    margin: auto;
+    color: #cbd5e1;
+    line-height: 2;
+    font-size: 1.1rem;
+  }
+
+  /* SEARCH PANEL */
+  .search-wrapper {
+    position: relative;
+    margin-top: -70px;
+    padding: 0 8%;
+    z-index: 5;
+  }
+
+  .search-panel {
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(25px);
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .55);
+    animation: panelReveal .8s ease;
+  }
+
+  @keyframes panelReveal {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .search-form {
+    display: flex;
+    gap: 15px;
+  }
+
+  .search-input {
+    flex: 1;
+    height: 65px;
+    padding: 0 25px;
+    background: #0b1020;
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 8px;
+    color: white;
+    outline: none;
+    font-size: 1rem;
+    transition: .4s;
+  }
+
+  .search-input::placeholder {
+    color: #6b7280;
+  }
+
+  .search-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(195, 155, 52, .2);
+  }
+
+  .search-btn {
+    padding: 0 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #c39b34;
+    color: #020307;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    transition: .4s;
+  }
+
+  .search-btn:hover {
+    background: #e5c45c;
+    color: #020307;
+    transform: translateY(-4px);
+  }
+
+  /* TRENDING SEARCHES */
+  .trending-searches {
+    margin-top: 35px;
+  }
+
+  .trending-title {
+    color: var(--gold);
+    font-size: .75rem;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .trending-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .trending-chip {
+    padding: 10px 18px;
+    background: #0b1020;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 20px;
+    color: #d1d5db;
+    text-decoration: none;
+    font-size: .85rem;
+    transition: .4s;
+  }
+
+  .trending-chip:hover {
+    color: white;
+    border-color: var(--gold);
+    transform: translateY(-4px);
+  }
+
+  /* RESULTS SECTION */
+  .results-section {
+    padding: 90px 8%;
+  }
+
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 45px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+  }
+
+  .results-header h2 {
+    font-family: "Cinzel", serif;
+    color: white;
+    font-size: 2.5rem;
+  }
+
+  .results-header span {
+    color: var(--gold);
+  }
+
+  .results-count {
+    color: var(--muted);
+  }
+
+  /* MOVIE GRID */
+  .movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 35px;
+  }
+
+  .movie-card {
+    position: relative;
+    text-decoration: none;
+    color: white;
+    transition: .5s;
+    animation: cardReveal .7s ease both;
+    display: block;
+  }
+
+  .movie-card:hover {
+    transform: translateY(-12px);
+  }
+
+  @keyframes cardReveal {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* POSTER */
+  .poster {
+    position: relative;
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    background: var(--film);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 12px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, .55);
+  }
+
+  .poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: .8;
+    transition: .6s;
+  }
+
+  .movie-card:hover .poster {
+    border-color: var(--gold);
+  }
+
+  .movie-card:hover .poster img {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+
+  /* MOVIE BADGES */
+  .rating-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 8px 14px;
+    background: rgba(0, 0, 0, .85);
+    backdrop-filter: blur(10px);
+    color: var(--gold);
+    font-size: .8rem;
+    font-weight: 700;
+    border-radius: 20px;
+  }
+
+  .ai-match-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    padding: 8px 14px;
+    background: rgba(195, 155, 52, .15);
+    border: 1px solid var(--gold);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: .75rem;
+    border-radius: 20px;
+  }
+
+  /* POSTER OVERLAY */
+  .poster-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 25px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, .95));
+    opacity: 0;
+    transition: .4s;
+  }
+
+  .movie-card:hover .poster-overlay {
+    opacity: 1;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .watch-btn, .wishlist-btn {
+    padding: 10px 18px;
+    border: 1px solid var(--gold);
+    color: white;
+    text-decoration: none;
+    background: rgba(0, 0, 0, .7);
+    font-size: .8rem;
+    border-radius: 6px;
+    transition: .3s;
+  }
+
+  .watch-btn:hover, .wishlist-btn:hover {
+    background: var(--gold);
+    color: black;
+  }
+
+  /* MOVIE INFO */
+  .movie-info {
+    padding-top: 18px;
+  }
+
+  .movie-title {
+    font-family: "Cinzel", serif;
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: white;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: 2.8em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .movie-meta {
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: .9rem;
+  }
+
+  /* AI RECOMMENDATION SECTION */
+  .ai-recommendations {
+    margin-top: 120px;
+  }
+
+  .ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 45px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+  }
+
+  .ai-header h2 {
+    font-family: "Cinzel", serif;
+    font-size: 2.5rem;
+    color: white;
+  }
+
+  .ai-header span {
+    color: var(--gold);
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    font-size: .8rem;
+  }
+
+  /* AI MOVIE CARD ENHANCEMENT */
+  .ai-card {
+    position: relative;
+  }
+
+  .ai-card::after {
+    content: "AI";
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: var(--gold);
+    color: black;
+    padding: 6px 12px;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .15em;
+    border-radius: 4px;
+  }
+
+  /* EMPTY STATES */
+  .empty-state {
+    width: 100%;
+    padding: 90px 40px;
+    text-align: center;
+    background: rgba(6, 9, 20, .85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+  }
+
+  .empty-state h3 {
+    font-family: "Cinzel", serif;
+    color: var(--gold);
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+  }
+
+  .empty-state p {
+    color: #9ca3af;
+    line-height: 1.9;
+    max-width: 650px;
+    margin: auto;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 25px;
+  }
+
+  /* SEARCH RESULT HIGHLIGHT */
+  .search-highlight {
+    color: var(--gold);
+  }
+
+  /* AI MATCH SCORE */
+  .match-score {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background: rgba(195, 155, 52, .15);
+    border: 1px solid var(--gold);
+    color: white;
+    padding: 8px 14px;
+    font-size: .75rem;
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+  }
+
+  /* ANIMATIONS */
+  .results-section section, .ai-recommendations {
+    animation: sectionReveal .9s ease;
+  }
+
+  @keyframes sectionReveal {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* RESPONSIVE DESIGN */
+  @media(min-width: 1400px) {
+    .movie-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .search-title {
+      font-size: 5.5rem;
+    }
+  }
+
+  @media(max-width: 1200px) {
+    .back-wrapper {
+      padding-left: 50px;
+    }
+    .search-wrapper, .results-section {
+      padding-left: 50px;
+      padding-right: 50px;
+    }
+    .movie-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media(max-width: 992px) {
+    .results-header, .ai-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    .results-header h2, .ai-header h2 {
+      font-size: 2rem;
+    }
+    .search-hero {
+      min-height: 55vh;
+      padding: 120px 40px 80px;
+    }
+    .search-title {
+      font-size: 3.2rem;
+    }
+    .search-panel {
+      padding: 30px;
+    }
+    .search-form {
+      flex-direction: column;
+    }
+    .search-btn {
+      height: 60px;
+    }
+    .movie-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 25px;
+    }
+  }
+
+  @media(max-width: 768px) {
+    .back-wrapper {
+      padding: 140px 20px 0;
+    }
+    .back-btn {
+      padding: 10px 18px;
+      font-size: .75rem;
+    }
+    .search-hero {
+      min-height: 45vh;
+      padding: 140px 20px 70px;
+    }
+    .search-tag {
+      font-size: 10px;
+      letter-spacing: .3em;
+    }
+    .search-title {
+      font-size: 2.3rem;
+    }
+    .search-description {
+      font-size: .95rem;
+      line-height: 1.8;
+    }
+    .search-wrapper {
+      margin-top: -35px;
+      padding: 0 14px;
+      width: 100%;
+    }
+    .search-panel {
+      padding: 18px;
+      width: 100%;
+      border-radius: 14px;
+      box-sizing: border-box;
+    }
+    .search-form{
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .search-input {
+      height: 58px;
+      width: 100%;
+      padding: 0 18px;
+      font-size: 16px;
+      box-sizing: border-box;
+      border-radius: 10px;
+    }
+    .search-btn {
+      font-size: .85rem;
+      padding: 0;
+      height: 58px;
+      border-radius: 10px;
+      width: 100%;
+    }
+    .trending-searches{
+      margin-top: 25px;
+    }
+    .trending-chips {
+      gap: 8px;
+      width: 100%;
+    }
+    .trending-chip {
+      padding: 8px 14px;
+      font-size: .75rem;
+    }
+    .results-section {
+      padding: 60px 20px;
+    }
+    .results-header h2, .ai-header h2 {
+      font-size: 1.7rem;
+    }
+    .movie-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+    .movie-title {
+      font-size: .95rem;
+    }
+    .movie-meta {
+      font-size: .75rem;
+    }
+    .rating-badge {
+      top: 10px;
+      right: 10px;
+      padding: 6px 10px;
+      font-size: .7rem;
+    }
+    .ai-match-badge {
+      top: 10px;
+      left: 10px;
+      padding: 6px 10px;
+      font-size: .65rem;
+    }
+  }
+
+  @media(max-width: 480px) {
+    .search-title {
+      font-size: 1.9rem;
+    }
+    .search-panel{
+      padding: 18px;
+    }
+    .movie-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .movie-title {
+      font-size: .85rem;
+    }
+    .watch-btn, .wishlist-btn {
+      padding: 8px 12px;
+      font-size: .7rem;
+    }
+    .poster-overlay {
+      padding-bottom: 15px;
+    }
+    .empty-state {
+      padding: 60px 20px;
+    }
+    .empty-state h3 {
+      font-size: 1.6rem;
+    }
+  }
+
+  @media(max-width:430px){
+  .search-wrapper{
+    padding: 0 12px;
+  }
+  .search-panel{
+    padding: 15px;
+  }
+  .search-input{
+    height: 55px;
+    font-size: 15px;
+  }
+  .search-btn{
+    height: 55px;
+  }
+  .search-title{
+      font-size:1.8rem;
+      line-height:1.2;
+  }
+
+  .search-description{
+      font-size:.9rem;
+      padding: 0 10px;
+  }
+
+  .movie-grid{
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+  }
+
+  .movie-info{
+      padding-top:12px;
+  }
+
+  .movie-title{
+      font-size:.85rem;
+  }
+
+  .movie-meta{
+      font-size:.72rem;
+  }
+}
+
+  @media(max-width: 360px) {
+    .movie-grid {
+      grid-template-columns: 1fr;
+    }
+    .search-title {
+      font-size: 1.7rem;
+    }
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .movie-card, .search-panel, .back-btn {
+    will-change: transform;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+
+  <div class="back-wrapper">
+    <a href="javascript:history.back()" class="back-btn">
+      ← Back
+    </a>
+  </div>
+
+  <section class="search-hero">
+    <div class="search-hero-content">
+      <div class="search-tag">LUMINARECS AI SEARCH ENGINE</div>
+      <h1 class="search-title">Find Your Next Masterpiece</h1>
+      <p class="search-description">
+        Search through thousands of movies, actors, directors and cinematic collections. Discover stories powered by AI.
+      </p>
+    </div>
+  </section>
+
+  <section class="search-wrapper">
+    <div class="search-panel">
+      <form method="GET" action="{% url 'search_movies_page' %}" class="search-form">
+        <input type="text"
+               name="q"
+               value="{{ query }}"
+               placeholder="Search movies, actors, directors..."
+               class="search-input"
+               required>
+        <button type="submit" class="search-btn">
+          Search
+        </button>
+      </form>
+
+      {% if trending_movies %}
+        <div class="trending-searches">
+          <div class="trending-title">TRENDING SEARCHES</div>
+          <div class="trending-chips">
+            {% for movie in trending_movies %}
+              <a href="?q={{ movie.title }}" class="trending-chip">
+                {{ movie.title }}
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="results-section">
+
+    {% if query %}
+      <div class="results-header">
+        <div>
+          <h2>Search Results For <span>"{{ query }}"</span></h2>
+        </div>
+        <div class="results-count">
+          {{ results.count }} Results Found
+        </div>
+      </div>
+    {% endif %}
+
+    {% if results %}
+      <div class="movie-grid">
+        {% for movie in results %}
+          <div class="movie-card">
+            <a href="{% url 'movie_details' movie.id %}">
+              <div class="poster">
+                {% if movie.poster_url %}
+                  <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                {% else %}
+                  <img src="{% static 'images/no-poster.svg' %}" alt="No Poster">
+                {% endif %}
+
+                <div class="rating-badge">
+                  ★ {{ movie.vote_average|default:"N/A" }}
+                </div>
+
+                <div class="poster-overlay">
+                  <div class="watch-btn">View Details</div>
+                </div>
+              </div>
+
+              <div class="movie-info">
+                <div class="movie-title">{{ movie.title }}</div>
+                <div class="movie-meta">
+                  {{ movie.release_year }}
+                  {% if movie.genres %}
+                    <br>{{ movie.genres }}
+                  {% endif %}
+                  {% if movie.director %}
+                    <br>Director: {{ movie.director }}
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% elif query %}
+      <div class="empty-state">
+        <div class="empty-icon">🎬</div>
+        <h3>No Movies Found</h3>
+        <p>
+          No results matched <strong>"{{ query }}"</strong>. Try another keyword.
+        </p>
+      </div>
+    {% endif %}
+
+    <div class="ai-recommendations">
+      <div class="ai-header">
+        <div>
+          <h2>AI Recommended For You</h2>
+        </div>
+        <div>
+          <span>PERSONALIZED DISCOVERY</span>
+        </div>
+      </div>
+
+      <div class="movie-grid">
+        {% for movie in recommended_movies %}
+          <div class="movie-card">
+            <a href="{% url 'movie_details' movie.id %}">
+              <div class="poster">
+                {% if movie.poster_url %}
+                  <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                {% else %}
+                  <img src="{% static 'images/no-poster.svg' %}" alt="No Poster">
+                {% endif %}
+
+                <div class="rating-badge">
+                  ★ {{ movie.vote_average|default:"N/A" }}
+                </div>
+
+                <div class="match-score">
+                  {{ movie.match_score|default:"96" }}% AI MATCH
+                </div>
+
+                <div class="poster-overlay">
+                  <div class="watch-btn">Explore</div>
+                </div>
+              </div>
+
+              <div class="movie-info">
+                <div class="movie-title">{{ movie.title }}</div>
+                <div class="movie-meta">
+                  {{ movie.release_year }}
+                  {% if movie.genres %}
+                    <br>{{ movie.genres }}
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+        {% empty %}
+          <div class="empty-state">
+            <div class="empty-icon">🤖</div>
+            <h3>Recommendations Coming Soon</h3>
+            <p>
+              Continue watching movies and LuminaRecs AI will understand your taste.
+            </p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </section>
+
+</div>
+{% endblock %}

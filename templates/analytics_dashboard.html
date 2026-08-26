@@ -1,0 +1,223 @@
+{% extends "base.html" %} {% load static %} {% block title %} LuminaRecs •
+Analytics Dashboard {% endblock %} {% block extra_css %}
+<style>
+  .analytics-hero {
+    padding: calc(90px + 50px) 70px 30px;
+    text-align: center;
+  }
+  .analytics-tag {
+    color: var(--prestige-gold);
+    font-size: 11px;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .analytics-title {
+    font-family: "Cinzel", serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    color: white;
+  }
+  .stats-section {
+    padding: 40px 70px 20px;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+  }
+  .stat-card {
+    background: linear-gradient(
+      145deg,
+      rgba(6, 9, 20, 0.95),
+      rgba(2, 3, 7, 0.85)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 35px 28px;
+    text-align: center;
+    transition: 0.4s;
+  }
+  .stat-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--prestige-gold);
+  }
+  .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+  .stat-number {
+    font-family: "Cinzel", serif;
+    font-size: 2.6rem;
+    color: var(--prestige-gold);
+    margin-bottom: 8px;
+  }
+  .stat-label {
+    color: #9ca3af;
+    font-size: 0.92rem;
+  }
+  .lists-section {
+    padding: 40px 70px 90px;
+  }
+  .lists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 30px;
+  }
+  .list-panel {
+    background: rgba(6, 9, 20, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    padding: 35px;
+  }
+  .list-panel h3 {
+    font-family: "Cinzel", serif;
+    color: var(--prestige-gold);
+    font-size: 1.3rem;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rank-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 13px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-decoration: none;
+    transition: 0.3s;
+  }
+  .rank-row:last-child {
+    border-bottom: none;
+  }
+  .rank-row:hover .rank-title {
+    color: var(--prestige-light);
+  }
+  .rank-num {
+    min-width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(195, 155, 52, 0.15);
+    border: 1px solid rgba(195, 155, 52, 0.4);
+    border-radius: 10px;
+    color: var(--prestige-light);
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .rank-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .rank-title {
+    color: white;
+    font-weight: 600;
+    font-size: 0.98rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: 0.3s;
+  }
+  .rank-meta {
+    color: #9ca3af;
+    font-size: 0.82rem;
+    margin-top: 4px;
+  }
+  @media (max-width: 992px) {
+    .analytics-hero {
+      padding: calc(80px + 40px) 35px 25px;
+    }
+    .stats-section,
+    .lists-section {
+      padding-left: 35px;
+      padding-right: 35px;
+    }
+  }
+  @media (max-width: 768px) {
+    .analytics-hero {
+      padding: calc(70px + 40px) 20px 20px;
+    }
+    .stats-section {
+      padding: 25px 20px 10px;
+    }
+    .lists-section {
+      padding: 25px 20px 60px;
+    }
+    .lists-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<section class="analytics-hero">
+  <div class="analytics-tag">ADMIN INSIGHTS</div>
+  <h1 class="analytics-title">Analytics Dashboard</h1>
+</section>
+
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">🎬</div>
+      <div class="stat-number">{{ total_movies }}</div>
+      <div class="stat-label">Total Movies</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-number">{{ total_users }}</div>
+      <div class="stat-label">Registered Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-number">{{ total_reviews }}</div>
+      <div class="stat-label">Reviews Written</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📺</div>
+      <div class="stat-number">{{ total_watch_history }}</div>
+      <div class="stat-label">Watch Records</div>
+    </div>
+  </div>
+</section>
+
+<section class="lists-section">
+  <div class="lists-grid">
+    <div class="list-panel">
+      <h3>🔥 Most Popular Movies</h3>
+      {% for movie in popular_movies %}
+      <a href="{% url 'movie_details' movie.id %}" class="rank-row">
+        <span class="rank-num">#{{ forloop.counter }}</span>
+        <span class="rank-info">
+          <span class="rank-title">{{ movie.title }}</span>
+          <span class="rank-meta" style="display: block"
+            >Popularity: {{ movie.popularity_score|floatformat:0 }} • ⭐ {{
+            movie.vote_average|default:"N/A" }}</span
+          >
+        </span>
+      </a>
+      {% empty %}
+      <p style="color: #9ca3af">No movies in the catalog yet.</p>
+      {% endfor %}
+    </div>
+
+    <div class="list-panel">
+      <h3>🏆 Top Rated Movies</h3>
+      {% for movie in top_rated_movies %}
+      <a href="{% url 'movie_details' movie.id %}" class="rank-row">
+        <span class="rank-num">#{{ forloop.counter }}</span>
+        <span class="rank-info">
+          <span class="rank-title">{{ movie.title }}</span>
+          <span class="rank-meta" style="display: block"
+            >Rating: {{ movie.vote_average|floatformat:1 }}/10 • Popularity {{
+            movie.popularity_score|floatformat:0 }}</span
+          >
+        </span>
+      </a>
+      {% empty %}
+      <p style="color: #9ca3af">No movies in the catalog yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

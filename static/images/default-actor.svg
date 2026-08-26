@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450">
+  <rect width="300" height="450" fill="#060914"/>
+  <rect x="0" y="0" width="300" height="450" fill="none" stroke="#c39b34" stroke-width="2"/>
+  <text x="150" y="200" text-anchor="middle" fill="#c39b34" font-family="Cinzel, serif" font-size="28">LuminaRecs</text>
+  <text x="150" y="240" text-anchor="middle" fill="#9ca3af" font-family="Inter, sans-serif" font-size="16">Actor</text>
+  <text x="150" y="280" text-anchor="middle" fill="#c39b34" font-size="40">🎭</text>
+</svg>

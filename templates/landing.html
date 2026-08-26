@@ -1,0 +1,754 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>LuminaRecs — Landing Experience</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --cinema-black: #020307;
+        --film-emulsion: #060914;
+        --prestige-gold: #c39b34;
+        --prestige-light: #e6c15c;
+        --text: #d1d5db;
+        --muted: #8d95a3;
+        --border: rgba(255, 255, 255, 0.08);
+        --glass: rgba(6, 9, 20, 0.78);
+        --lens-blue: rgba(0, 110, 255, 0.15);
+        --font-serif:"Inter",sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--cinema-black);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+
+      /* =========================
+       FILM GRAIN
+    ========================= */
+      .film-grain {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        pointer-events: none;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+
+      /* =========================
+       CINEMA BARS
+    ========================= */
+      .matte-top,
+      .matte-bottom {
+        position: fixed;
+        left: 0;
+        width: 100%;
+        height: 8vh;
+        background: #000;
+        z-index: 950;
+      }
+
+      .matte-top {
+        top: 0;
+      }
+
+      .matte-bottom {
+        bottom: 0;
+      }
+
+      /* =========================
+       VIDEO BACKGROUND
+    ========================= */
+      .hero-video {
+        position: fixed;
+        inset: 0;
+        z-index: -3;
+      }
+
+      .hero-video video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.25) contrast(1.15);
+      }
+
+      /* =========================
+       PROJECTOR EFFECT
+    ========================= */
+      .projector-lens {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -2;
+        background:
+          radial-gradient(
+            circle at 50% 45%,
+            transparent 20%,
+            rgba(2, 3, 7, 0.85) 80%
+          ),
+          radial-gradient(
+            circle at 20% 30%,
+            var(--lens-blue) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 70%,
+            rgba(195, 155, 52, 0.05) 0%,
+            transparent 40%
+          );
+      }
+
+      /* =========================
+       NAVBAR
+    ========================= */
+      .navbar {
+        position: fixed;
+        top: 6vh;
+        left: 0;
+        width: 100%;
+        height: 90px;
+        padding: 0 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 900;
+        background: linear-gradient(to bottom, rgba(2, 3, 7, 0.95), rgba(2, 3, 7, 0.55));
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .logo {
+        text-decoration: none;
+        color: white;
+        font-family: "Cinzel", serif;
+        font-size: 2rem;
+        font-weight: 700;
+      }
+
+      .logo span {
+        color: var(--prestige-gold);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        color: #9ca3af;
+        transition: 0.3s;
+      }
+
+      .nav-links a:hover {
+        color: white;
+      }
+
+      .nav-cta {
+        padding: 12px 24px;
+        border: 1px solid rgba(195, 155, 52, 0.35);
+        color: white !important;
+        border-radius: 12px;
+      }
+
+      .nav-cta:hover {
+        background: var(--prestige-gold);
+        color: black !important;
+      }
+      .arrow {
+        animation: pulseArrow 1.5s infinite;
+      }
+
+      @keyframes pulseArrow {
+        0%,
+        100% {
+          transform: translateX(0);
+
+          opacity: 0.5;
+        }
+
+        50% {
+          transform: translateX(10px);
+
+          opacity: 1;
+        }
+      }
+
+      /* =========================
+       HERO SECTION
+    ========================= */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 20px;
+        text-align: center;
+      }
+
+      .hero-content {
+        max-width: 950px;
+        background: var(--glass);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 30px;
+        padding: 70px 64px;
+        box-shadow: 0 30px 80px rgba(2, 3, 7, 0.45);
+        animation: cinemaReveal 1.3s ease;
+        width: min(90vw,950px);
+      }
+
+      @keyframes cinemaReveal {
+        from {
+          opacity: 0;
+          transform: translateY(40px) scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .section-tag {
+        color: var(--prestige-gold);
+        font-size: 11px;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+
+      .hero-title {
+        font-family: "Cinzel", serif;
+        color: white;
+        line-height: 1.15;
+        font-size: clamp(2rem, 6vw, 5.5rem);
+        margin-bottom: 25px;
+        word-wrap:break-word;
+      }
+
+      .hero-subtitle {
+        max-width: 700px;
+        margin: 0 auto 45px;
+        line-height: 1.9;
+        font-size: 1.15rem;
+        color: #b7bec8;
+      }
+
+      /* =========================
+       BUTTONS
+    ========================= */
+      .hero-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        text-decoration: none;
+        padding: 18px 38px;
+        border-radius: 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        transition: 0.35s;
+      }
+
+      .btn:hover {
+        transform: translateY(-4px);
+      }
+      .btn:active {
+        transform: scale(0.96);
+      }
+      .btn-primary {
+        background: var(--prestige-gold);
+        color: black;
+      }
+
+      .btn-primary:hover {
+        background: var(--prestige-light);
+      }
+
+      .btn-secondary {
+        color: white;
+        background: rgba(6, 9, 20, 0.6);
+        border: 1px solid rgba(195, 155, 52, 0.35);
+      }
+
+      /* =========================
+       COMMON SECTION STYLES
+    ========================= */
+      .showcase,
+      .features,
+      .cta-section {
+        padding: 120px 8%;
+        position: relative;
+        z-index: 5;
+      }
+
+      .section-header {
+        text-align: center;
+        margin-bottom: 70px;
+      }
+
+      .section-title {
+        font-family: "Cinzel", serif;
+        color: white;
+        font-size: 3rem;
+        margin-bottom: 15px;
+      }
+
+      .section-subtitle {
+        max-width: 700px;
+        margin: auto;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      /* =========================
+       AI FLOW
+    ========================= */
+      .ai-flow {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 25px;
+        flex-wrap: wrap;
+      }
+
+      .movie-box {
+        padding: 25px 30px;
+        background: rgba(6, 9, 20, 0.78);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        transition: 0.4s;
+        font-family: "Cinzel", serif;
+        color: white;
+        font-size: 1.1rem;
+        letter-spacing: 0.05em;
+      }
+
+      .movie-box:hover {
+        border-color: var(--prestige-gold);
+        transform: translateY(-6px);
+      }
+
+      .arrow {
+        color: var(--prestige-gold);
+        font-size: 2rem;
+      }
+
+      /* =========================
+       FEATURE CARDS
+    ========================= */
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+      }
+
+      .feature-card {
+        padding: 35px;
+        background: rgba(6, 9, 20, 0.78);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        transition: 0.4s;
+      }
+
+      .feature-card:hover {
+        border-color: var(--prestige-gold);
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(195, 155, 52, .15);
+      }
+
+      .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+
+      .feature-title {
+        color: white;
+        font-family: "Cinzel", serif;
+        margin-bottom: 15px;
+      }
+
+      .feature-text {
+        color: #9ca3af;
+        line-height: 1.8;
+      }
+
+      /* =========================
+       CTA SECTION
+    ========================= */
+      .cta-box {
+        max-width: 1000px;
+        margin: auto;
+        padding: 80px;
+        border-radius: 30px;
+        text-align: center;
+        background: linear-gradient(
+          135deg,
+          rgba(195, 155, 52, 0.12),
+          rgba(6, 9, 20, 0.9)
+        );
+        border: 1px solid rgba(195, 155, 52, 0.25);
+      }
+
+      .cta-box h2 {
+        font-family: "Cinzel", serif;
+        color: white;
+        font-size: 3rem;
+        margin-bottom: 20px;
+      }
+
+      .cta-box p {
+        max-width: 700px;
+        margin: 0 auto 40px;
+        color: #b7bec8;
+        line-height: 1.8;
+      }
+      /* =========================
+   FOOTER
+========================= */
+
+      .footer {
+        padding: 90px 8%;
+        background: #060914;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: center;
+        position: relative;
+        z-index: 10;
+      }
+
+      .footer-logo {
+        font-family: "Cinzel", serif;
+        font-size: 2.5rem;
+        color: white;
+        margin-bottom: 25px;
+      }
+
+      .footer-logo span {
+        color: var(--prestige-gold);
+      }
+
+      .footer-description {
+        max-width: 700px;
+        margin: auto;
+        color: #9ca3af;
+        line-height: 1.9;
+        font-size: 1rem;
+      }
+      ::selection {
+        background: var(--prestige-gold);
+        color: black;
+      }
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #020307;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #c39b34;
+        border-radius: 20px;
+      }
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 35px;
+        flex-wrap: wrap;
+        margin: 40px 0;
+      }
+
+      .footer-links a {
+        text-decoration: none;
+        color: #9ca3af;
+        transition: 0.3s;
+      }
+
+      .footer-links a:hover {
+        color: var(--prestige-gold);
+      }
+
+      .footer-copy {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-top: 30px;
+      }
+      /* =========================
+       RESPONSIVE
+    ========================= */
+    @media (min-width: 1400px){
+      .hero-content{
+        max-width: 890px;
+        padding: 50px 45px;
+      }
+      .hero-title{
+        font-size: clamp(3rem, 6vw, 4.5rem);
+      }
+      .hero-subtitle{
+        font-size: 1.05rem;
+        max-width: 620px;
+      }
+    }
+      @media (min-width:1200px){
+        .footer-description{
+          font-size: 1.05rem;
+        }
+        .footer-links{
+          gap: 50px;
+        }
+      }
+      @media (max-width: 992px) {
+        .hero-content {
+          padding: 50px 35px;
+        }
+
+        .section-title {
+          font-size: 2.3rem;
+        }
+
+        .cta-box {
+          padding: 50px 35px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .logo {
+          font-size: 1.6rem;
+        }
+        .hero-video video {
+          object-position: center;
+        }
+        .film-grain {
+          opacity: 0.03;
+        } 
+        .ai-flow{
+          flex-direction: column;
+
+        }
+        .arrow{
+          transform: rotate(90deg);
+        }
+        .navbar {
+          padding: 0 25px;
+        }
+        .nav-links {
+          display: none;
+        }
+
+        .hero-title {
+          font-size: 3rem;
+        }
+
+        .hero-content {
+          padding: 40px 25px;
+        }
+
+        .section-title {
+          font-size: 2rem;
+        }
+
+        .cta-box h2 {
+          font-size: 2rem;
+        }
+
+        .footer {
+          padding: 70px 20px;
+        }
+      }
+      @media (max-width:576px){
+        .hero-buttons{
+          flex-direction: column;
+          width: 100%;
+        }
+        .btn{
+          width: 100%;
+          text-align: center;
+        }
+      }
+      @media screen and (max-width: 430px){
+        .hero-title{
+          font-size: 2rem;
+          line-height: 1.15;
+        }
+        .hero-content{
+          padding: 30px 20px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="film-grain"></div>
+
+    <div class="matte-top"></div>
+    <div class="matte-bottom"></div>
+
+    <div class="hero-video">
+      <video autoplay muted loop playsinline>
+        <source src="{% static 'videos/landing.mp4' %}" type="video/mp4" />
+      </video>
+    </div>
+
+    <div class="projector-lens"></div>
+
+    <nav class="navbar">
+      <a href="#" class="logo">Lumina<span>Recs</span></a>
+
+      <div class="nav-links">
+        <a href="#showcase">AI Engine</a>
+        <a href="#features">Features</a>
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'signup' %}">Create Account</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-content">
+        <div class="section-tag">AI POWERED MOVIE RECOMMENDATION ENGINE</div>
+
+        <h1 class="hero-title">
+          Discover Your Next<br />
+          Cinematic Obsession
+        </h1>
+
+        <p class="hero-subtitle">
+          Personalized movie recommendations, intelligent discovery, watchlists,
+          trailers, analytics, and cinematic exploration powered by machine
+          learning.
+        </p>
+
+        <div class="hero-buttons">
+          <a href="{% url 'signup' %}" class="btn btn-primary"
+            >Create Account</a
+          >
+          <a href="{% url 'login' %}" class="btn btn-secondary">Login</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="showcase" id="showcase">
+      <div class="section-header">
+        <div class="section-tag">RECOMMENDATION ENGINE</div>
+        <h2 class="section-title">How The AI Thinks</h2>
+        <p class="section-subtitle">
+          Our recommendation engine analyzes movie patterns, genres, ratings,
+          keywords, and viewing preferences to discover hidden cinematic
+          connections.
+        </p>
+      </div>
+
+      <div class="ai-flow">
+        <div class="movie-box">Interstellar</div>
+        <div class="movie-box">Inception</div>
+        <div class="arrow">&rarr;</div>
+        <div class="movie-box">AI Engine</div>
+        <div class="arrow">&rarr;</div>
+        <div class="movie-box">Arrival</div>
+        <div class="movie-box">The Martian</div>
+      </div>
+    </section>
+
+    <section class="features" id="features">
+      <div class="section-header">
+        <div class="section-tag">PLATFORM FEATURES</div>
+        <h2 class="section-title">Why LuminaRecs?</h2>
+        <p class="section-subtitle">
+          Designed for movie lovers who want deeper discovery, smarter
+          suggestions, and a beautiful cinematic experience.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎬</div>
+          <h3 class="feature-title">Smart Recommendations</h3>
+          <p class="feature-text">
+            AI learns your taste and suggests movies you'll actually enjoy.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">❤️</div>
+          <h3 class="feature-title">Personal Wishlist</h3>
+          <p class="feature-text">
+            Save movies, organize favorites, and build your watchlist.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📈</div>
+          <h3 class="feature-title">Movie Analytics</h3>
+          <p class="feature-text">
+            Explore ratings, popularity, genres, and audience insights.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="cta-box">
+        <div class="section-tag">START NOW</div>
+        <h2>Begin Your Cinematic Journey</h2>
+        <p>
+          Create your profile, discover thousands of movies, receive intelligent
+          recommendations, and build your personal movie universe.
+        </p>
+
+        <div class="hero-buttons">
+          <a href="{% url 'signup' %}" class="btn btn-primary">Get Started</a>
+          <a href="{% url 'login' %}" class="btn btn-secondary">Login</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-logo">Lumina<span>Recs</span></div>
+
+      <p class="footer-description">
+        Discover extraordinary stories through artificial intelligence.
+        LuminaRecs learns your cinematic taste and delivers personalized
+        recommendations and unforgettable viewing experiences.
+      </p>
+
+      <div class="footer-links">
+        <a href="#showcase">AI Engine</a>
+        <a href="#features">Features</a>
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'signup' %}">Sign Up</a>
+      </div>
+
+      <div class="footer-copy">
+        &copy; 2026 LuminaRecs &bull; AI Movie Recommendation Platform
+      </div>
+    </footer>
+  </body>
+</html>

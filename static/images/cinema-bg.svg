@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#c39b34" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#020307" stop-opacity="1"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="#020307"/>
+  <rect width="1920" height="1080" fill="url(#glow)"/>
+  <text x="960" y="500" text-anchor="middle" fill="#c39b34" font-family="Cinzel, serif" font-size="80">LuminaRecs</text>
+  <text x="960" y="560" text-anchor="middle" fill="#9ca3af" font-family="Inter, sans-serif" font-size="30">Cinematic Experience</text>
+  <text x="960" y="620" text-anchor="middle" fill="#c39b34" font-size="60">🎬</text>
+</svg>

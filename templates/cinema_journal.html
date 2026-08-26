@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Cinema Journal | LuminaRecs{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="glass-card">
+    <p class="section-tag">CINEMA JOURNAL</p>
+    <h1 class="section-title">{{ movie.title }}</h1>
+    <p class="section-subtitle">Use your journal to capture thoughts after watching this film.</p>
+    <a class="home-btn home-btn-primary" href="{% url 'movie_details' movie.id %}">Back to movie</a>
+  </div>
+</section>
+{% endblock %}

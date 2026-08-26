@@ -1,0 +1,1058 @@
+{% extends "base.html" %} {% load static %} {% block title %} LuminaRecs • Home
+{% endblock %} {% block extra_css %}
+<style>
+  /* =====================================================
+     LUMINARECS HOMEPAGE V2 - CINEMATIC AI DISCOVERY UI
+  ===================================================== */
+
+  /* PAGE WRAPPER */
+  .homepage-wrapper {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* =====================================================
+     HERO SECTION
+  ===================================================== */
+  .home-hero {
+    min-height: calc(100vh - 8vh);
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(90px + 8vh) 70px 80px;
+    overflow: hidden;
+  }
+
+  /* HERO VIDEO */
+  .home-hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.22) contrast(1.2);
+    z-index: 0;
+    animation: heroZoom 20s infinite alternate;
+  }
+
+  @keyframes heroZoom {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.08);
+    }
+  }
+
+  /* HERO OVERLAY */
+  .home-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(2, 3, 7, 0.35), rgba(2, 3, 7, 0.96)),
+      radial-gradient(circle at center, transparent 20%, rgba(2, 3, 7, 0.9));
+    z-index: 1;
+  }
+
+  /* HERO CONTENT */
+  .home-hero-content {
+    position: relative;
+    z-index: 5;
+    max-width: 950px;
+    animation: heroReveal 1.2s ease;
+  }
+
+  @keyframes heroReveal {
+    from {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .home-hero-tag {
+    color: var(--prestige-gold);
+    font-size: 12px;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+  }
+
+  .home-hero-title {
+    font-family: "Cinzel", serif;
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    line-height: 1.08;
+    color: white;
+    margin-bottom: 30px;
+  }
+
+  .home-hero-title span {
+    color: var(--prestige-gold);
+  }
+
+  .home-hero-description {
+    max-width: 720px;
+    font-size: 1.1rem;
+    line-height: 2;
+    color: #cbd5e1;
+    margin-bottom: 40px;
+  }
+
+  /* HERO BUTTONS */
+  .home-hero-buttons {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .home-btn {
+    padding: 16px 35px;
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: 0.4s;
+  }
+
+  .home-btn:hover {
+    transform: translateY(-5px);
+  }
+
+  .home-btn-primary {
+    background: var(--prestige-gold);
+    color: black;
+  }
+
+  .home-btn-primary:hover {
+    background: var(--prestige-light);
+  }
+
+  .home-btn-outline {
+    border: 1px solid rgba(195, 155, 52, 0.5);
+    color: white;
+  }
+
+  .home-btn-outline:hover {
+    background: var(--prestige-gold);
+    color: black;
+  }
+
+  /* HERO STAT CARDS */
+  .home-hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 70px;
+  }
+
+  .home-stat {
+    background: rgba(6, 9, 20, 0.75);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 25px;
+    transition: 0.4s;
+  }
+
+  .home-stat:hover {
+    transform: translateY(-10px);
+    border-color: var(--prestige-gold);
+  }
+
+  .home-stat-number {
+    font-family: "Cinzel", serif;
+    font-size: 2.2rem;
+    color: var(--prestige-gold);
+  }
+
+  .home-stat-label {
+    color: #9ca3af;
+    margin-top: 8px;
+  }
+
+  /* =====================================================
+     SEARCH DESIGN
+  ===================================================== */
+  .home-search-box {
+    padding: 50px;
+  }
+
+  .home-search-form {
+    display: flex;
+    gap: 15px;
+    max-width: 850px;
+    margin: auto;
+  }
+
+  .home-search-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 18px 20px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+  }
+
+  .home-search-input:focus {
+    border-color: var(--prestige-gold);
+  }
+  /* =====================================================
+   GENRE EXPLORER SECTION
+===================================================== */
+
+  .section-header {
+    margin-bottom: 50px;
+  }
+
+  .section-tag {
+    color: var(--prestige-gold);
+    font-size: 12px;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    font-family: "Cinzel", serif;
+    font-size: 3rem;
+    color: white;
+    margin-bottom: 15px;
+  }
+
+  .section-subtitle {
+    color: #9ca3af;
+    max-width: 750px;
+    line-height: 1.9;
+  }
+
+  /* GENRE GRID */
+
+  .genre-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+  }
+
+  /* GENRE CARD */
+
+  .genre-card {
+    position: relative;
+
+    padding: 40px 30px;
+
+    text-decoration: none;
+    color: white;
+
+    background: linear-gradient(
+      145deg,
+      rgba(6, 9, 20, 0.95),
+      rgba(2, 3, 7, 0.85)
+    );
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    backdrop-filter: blur(20px);
+
+    overflow: hidden;
+
+    transition: 0.5s;
+  }
+
+  /* GOLD GLOW EFFECT */
+
+  .genre-card::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background: radial-gradient(
+      circle at top right,
+      rgba(195, 155, 52, 0.25),
+      transparent 45%
+    );
+
+    opacity: 0;
+
+    transition: 0.5s;
+  }
+
+  .genre-card:hover {
+    transform: translateY(-12px);
+
+    border-color: var(--prestige-gold);
+  }
+
+  .genre-card:hover::before {
+    opacity: 1;
+  }
+
+  /* ICON */
+
+  .genre-icon {
+    position: relative;
+
+    z-index: 2;
+
+    font-size: 3rem;
+
+    margin-bottom: 25px;
+  }
+
+  /* NAME */
+
+  .genre-name {
+    position: relative;
+
+    z-index: 2;
+
+    font-family: "Cinzel", serif;
+
+    font-size: 1.5rem;
+
+    margin-bottom: 15px;
+  }
+
+  /* DESCRIPTION */
+
+  .genre-card p {
+    position: relative;
+
+    z-index: 2;
+
+    color: #9ca3af;
+
+    line-height: 1.8;
+
+    font-size: 0.95rem;
+  }
+
+  /* HOVER TEXT */
+
+  .genre-card:hover .genre-name {
+    color: var(--prestige-gold);
+  }
+
+  /* =====================================================
+     FEATURED MOVIE
+  ===================================================== */
+  .home-feature-wrapper {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .home-feature-content {
+    padding: 50px;
+  }
+
+  .home-feature-title {
+    font-family: "Cinzel", serif;
+    font-size: 4rem;
+    line-height: 1.1;
+    color: white;
+    margin: 20px 0;
+  }
+
+  .home-feature-description {
+    color: #cbd5e1;
+    line-height: 2;
+    margin-bottom: 35px;
+  }
+
+  .home-feature-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 35px;
+  }
+
+  .home-feature-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 15px 20px;
+    color: white;
+  }
+
+  .home-feature-item strong {
+    color: var(--prestige-gold);
+  }
+
+  .home-feature-poster {
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .home-feature-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.6s;
+  }
+
+  .home-feature-poster:hover img {
+    transform: scale(1.08);
+  }
+
+  /* =====================================================
+     HOMEPAGE MOVIE GRID FIX
+  ===================================================== */
+  .home-movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 30px;
+  }
+
+  .home-movie-grid .movie-poster-wrapper {
+    aspect-ratio: 2 / 3;
+  }
+
+  /* =====================================================
+     CONTINUE WATCHING FIX
+  ===================================================== */
+  .home-watch-grid .movie-card {
+    cursor: pointer;
+  }
+
+  .home-watch-grid .movie-poster-wrapper {
+    aspect-ratio: 2/3;
+  }
+
+  .progress-track {
+    height: 6px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    margin-top: 15px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--prestige-gold);
+    transition: width 0.5s ease;
+  }
+
+  /* =====================================================
+     HOMEPAGE GLOBAL ANIMATION & POLISH
+  ===================================================== */
+  .homepage-wrapper section {
+    animation: homeFade 0.8s ease both;
+  }
+
+  @keyframes homeFade {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .home-movie-grid .movie-card:hover,
+  .home-watch-grid .movie-card:hover {
+    border-color: var(--prestige-gold);
+    transform: translateY(-10px);
+  }
+
+  .home-feature-content,
+  .home-search-box,
+  .home-stat,
+  .movie-card,
+  .genre-card {
+    backdrop-filter: blur(20px);
+  }
+
+  /* =====================================================
+     MEDIA QUERIES
+  ===================================================== */
+  @media (min-width: 1400px) {
+    .home-hero-content {
+      max-width: 1100px;
+    }
+    .home-movie-grid,
+    .home-watch-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .home-hero {
+      padding-left: 50px;
+      padding-right: 50px;
+    }
+    .home-feature-wrapper {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .home-feature-poster {
+      max-width: 420px;
+      margin: auto;
+    }
+    .home-feature-title {
+      font-size: 3rem;
+    }
+    .home-movie-grid,
+    .home-watch-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (max-width: 992px) {
+    .home-hero {
+      padding: calc(80px + 6vh) 35px 70px;
+    }
+    .home-hero-title {
+      font-size: 3rem;
+    }
+    .home-hero-content {
+      width: 100%;
+    }
+    .home-hero-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .home-feature-wrapper {
+      gap: 30px;
+    }
+    .home-movie-grid,
+    .home-watch-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+    }
+    .section-title {
+      font-size: 2.2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .viewport {
+      align-items: flex-start;
+    }
+    .home-hero-video {
+      filter: brightness(0.18) contrast(1);
+
+      animation: none;
+    }
+    .home-hero {
+      padding: 150px 20px 60px;
+      min-height: 100vh;
+    }
+    .home-hero-tag {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+    }
+    .home-hero-title {
+      font-size: 2.2rem;
+    }
+    .home-hero-description {
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+    .home-hero-buttons {
+      flex-direction: column;
+    }
+    .home-btn {
+      width: 100%;
+      text-align: center;
+    }
+    .home-hero-stats {
+      grid-template-columns: 1fr;
+      margin-top: 40px;
+    }
+    .section {
+      padding: 55px 20px;
+    }
+    .section-header {
+      margin-bottom: 30px;
+    }
+    .home-search-box {
+      padding: 25px;
+    }
+    .home-search-form {
+      flex-direction: column;
+    }
+    .home-search-form button {
+      width: 100%;
+    }
+    .home-feature-wrapper {
+      grid-template-columns: 1fr;
+    }
+    .home-feature-content {
+      padding: 25px;
+    }
+    .home-feature-title {
+      font-size: 2.2rem;
+    }
+    .home-feature-description {
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+    .home-feature-meta {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .home-feature-item {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 0.85rem;
+    }
+    .home-feature-poster {
+      max-width: 280px;
+      margin: auto;
+    }
+    .home-movie-grid,
+    .home-watch-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+    .home-movie-grid .movie-title {
+      font-size: 0.95rem;
+    }
+    .home-movie-grid .movie-meta {
+      font-size: 0.8rem;
+    }
+    .genre-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .genre-card {
+      padding: 20px 18px;
+    }
+    .bg video,
+    .home-hero-video {
+      animation: none;
+      filter: brightness(0.2);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .home-hero {
+      padding: 140px 15px 50px;
+    }
+    .home-hero-title {
+      font-size: 1.9rem;
+    }
+    .home-hero-description {
+      font-size: 0.9rem;
+    }
+    .home-btn {
+      padding: 14px 20px;
+    }
+    .section-title {
+      font-size: 1.5rem;
+    }
+    .home-search-input {
+      padding: 15px;
+    }
+    .home-feature-title {
+      font-size: 1.8rem;
+    }
+    .home-movie-grid,
+    .home-watch-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .home-movie-grid .movie-title,
+    .movie-title {
+      font-size: 0.85rem;
+    }
+    .movie-info {
+      padding: 12px;
+    }
+    .movie-meta {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .home-hero-title {
+      font-size: 1.5rem;
+    }
+    .home-movie-grid,
+    .home-watch-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="homepage-wrapper">
+  <section class="home-hero">
+    <video class="home-hero-video" autoplay muted loop playsinline>
+      <source src="{% static 'videos/homepage.mp4' %}" type="video/mp4" />
+    </video>
+
+    <div class="home-hero-overlay"></div>
+
+    <div class="home-hero-content">
+      <div class="home-hero-tag">AI POWERED CINEMA DISCOVERY</div>
+
+      <h1 class="home-hero-title">
+        Welcome Back To Your<br />
+        <span>Cinema Universe</span>
+      </h1>
+
+      <p class="home-hero-description">
+        Discover extraordinary stories through artificial intelligence.
+        LuminaRecs understands your cinematic taste and creates personalized
+        movie recommendations using AI-powered analysis.
+      </p>
+
+      <div class="home-hero-buttons">
+        <a href="{% url 'discover' %}" class="home-btn home-btn-primary">
+          Explore Movies
+        </a>
+        <a href="#recommended" class="home-btn home-btn-outline">
+          Recommendations
+        </a>
+      </div>
+
+      <div class="home-hero-stats">
+        <div class="home-stat">
+          <div class="home-stat-number">{{ movies_watched|default:"124" }}</div>
+          <div class="home-stat-label">Movies Watched</div>
+        </div>
+
+        <div class="home-stat">
+          <div class="home-stat-number">{{ accuracy|default:"97" }}%</div>
+          <div class="home-stat-label">AI Accuracy</div>
+        </div>
+
+        <div class="home-stat">
+          <div class="home-stat-number">
+            {{ recommendations_count|default:"850" }}
+          </div>
+          <div class="home-stat-label">Recommendations</div>
+        </div>
+
+        <div class="home-stat">
+          <div class="home-stat-number">
+            {{ favorite_genre|default:"Sci-Fi" }}
+          </div>
+          <div class="home-stat-label">Favorite Genre</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section home-search-section">
+    <div class="glass-card home-search-box">
+      <div class="section-header">
+        <div>
+          <div class="section-tag">SEARCH ARCHIVE</div>
+          <h2 class="section-title">Find Your Next Movie</h2>
+          <p class="section-subtitle">
+            Search movies, actors, directors and cinematic collections.
+          </p>
+        </div>
+      </div>
+
+      <form
+        action="{% url 'search_movies_page' %}"
+        method="GET"
+        class="home-search-form"
+      >
+        <input
+          type="text"
+          name="q"
+          placeholder="Search movies..."
+          class="home-search-input"
+          required
+        />
+        <button type="submit" class="home-btn home-btn-primary">Search</button>
+      </form>
+    </div>
+  </section>
+
+  {% if daily_pick %}
+  <section class="section home-feature-section">
+    <div class="home-feature-wrapper">
+      <div class="home-feature-content glass-card">
+        <div class="section-tag">AI PICK OF THE DAY</div>
+
+        <h2 class="home-feature-title">
+          {{ daily_pick.title|default:"Interstellar" }}
+        </h2>
+
+        <p class="home-feature-description">
+          {{ daily_pick.reason }}
+        </p>
+
+        <div class="home-feature-meta">
+          <div class="home-feature-item">
+            <strong>Confidence</strong><br />
+            {{ daily_pick.confidence|default:"98" }}%
+          </div>
+
+          <div class="home-feature-item">
+            <strong>Genre</strong><br />
+            {{daily_pick.genre}}
+          </div>
+
+          <div class="home-feature-item">
+            <strong>AI Match</strong><br />
+            96%
+          </div>
+        </div>
+
+        <a
+          href="{% url 'movie_details' daily_pick.id %}"
+          class="home-btn home-btn-primary"
+        >
+          Explore Movie
+        </a>
+      </div>
+
+      <div class="home-feature-poster">
+        {% if daily_pick.poster_url %}
+        <img src="{{ daily_pick.poster_url }}" alt="{{ daily_pick.title }}" />
+        {% else %}
+        <img
+          src="{% static 'images/default-poster.svg' %}"
+          alt="Movie Poster"
+        />
+        {% endif %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-tag">SEMANTIC AI ENGINE</div>
+
+        <h2 class="section-title">Semantic AI Recommendations</h2>
+
+        <p class="section-subtitle">
+          Movies discovered using Sentence Transformers + FAISS.
+        </p>
+      </div>
+    </div>
+
+    {% if ai_recommendations %}
+
+    <div class="movie-grid home-movie-grid">
+      {% for item in ai_recommendations %}
+      <a href="{% url 'movie_details' item.movie.id %}" class="movie-card">
+        <div class="movie-poster-wrapper">
+          {% if item.movie.poster_url %}
+          <img
+            src="{{ item.movie.poster_url }}"
+            alt="{{ item.movie.title }}"
+            class="movie-image"
+            loading="lazy"
+          />
+          {% else %}
+          <img
+            src="{% static 'images/default-poster.svg' %}"
+            alt="{{ item.movie.title }}"
+            class="movie-image"
+            loading="lazy"
+          />
+          {% endif %}
+        </div>
+
+        <div class="movie-info">
+          <h3 class="movie-title">{{ item.movie.title }}</h3>
+
+          <p class="movie-meta">AI Semantic Match</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% else %}
+
+    <div class="empty-card">No semantic recommendations available.</div>
+
+    {% endif %}
+  </section>
+  <section class="section" id="recommended">
+    <div class="section-header">
+      <div>
+        <div class="section-tag">PERSONALIZED FOR YOU</div>
+        <h2 class="section-title">AI Recommended Movies</h2>
+        <p class="section-subtitle">
+          Movies selected according to your cinematic taste and AI profile.
+        </p>
+      </div>
+    </div>
+
+    <div class="movie-grid home-movie-grid">
+      {% for movie in recommendations %}
+      <a href="{% url 'movie_details' movie.movie.id %}" class="movie-card">
+        <div class="movie-poster-wrapper">
+          {% if movie.movie.poster_url %}
+          <img
+            src="{{ movie.movie.poster_url }}"
+            alt="{{ movie.movie.title }}"
+            class="movie-image"
+            loading="lazy"
+          />
+          {% else %}
+          <img
+            src="{% static 'images/default-poster.svg' %}"
+            alt="{{ movie.movie.title }}"
+            class="movie-image"
+            loading="lazy"
+          />
+          {% endif %}
+
+          <div class="movie-overlay">
+            <div class="match-score">
+              {{ movie.match_score|default:"96" }}% MATCH
+            </div>
+          </div>
+        </div>
+
+        <div class="movie-info">
+          <h3 class="movie-title">{{ movie.movie.title }}</h3>
+          <p class="movie-meta">AI Recommended</p>
+        </div>
+      </a>
+      {% empty %}
+      <div class="empty-card">No AI recommendations available yet.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-tag">COMMUNITY FAVORITES</div>
+        <h2 class="section-title">Trending Now</h2>
+        <p class="section-subtitle">
+          Most watched movies by the LuminaRecs community.
+        </p>
+      </div>
+    </div>
+
+    <div class="movie-grid home-movie-grid">
+      {% for movie in trending_movies %}
+      <a href="{% url 'movie_details' movie.id %}" class="movie-card">
+        <div class="movie-poster-wrapper">
+          {% if movie.poster_url %}
+          <img
+            src="{{ movie.poster_url }}"
+            alt="{{ movie.title }}"
+            class="movie-image"
+            loading="lazy"
+          />
+          {% else %}
+          <img
+            src="{% static 'images/default-poster.svg' %}"
+            alt="{{ movie.title }}"
+            class="movie-image"
+            loading="lazy"
+          />
+          {% endif %}
+
+          <div class="rank-badge">#{{ forloop.counter }}</div>
+        </div>
+
+        <div class="movie-info">
+          <h3 class="movie-title">{{ movie.title }}</h3>
+          <p class="movie-meta">Trending This Week</p>
+        </div>
+      </a>
+      {% empty %}
+      <div class="empty-card">No trending movies available.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-tag">DISCOVER CINEMA</div>
+        <h2 class="section-title">Genre Explorer</h2>
+        <p class="section-subtitle">
+          Explore movies based on your favorite cinematic worlds.
+        </p>
+      </div>
+    </div>
+
+    <div class="genre-grid">
+      <a href="{% url 'genre_movies' 'science-fiction' %}" class="genre-card">
+        <div class="genre-icon">🚀</div>
+        <h3 class="genre-name">Science Fiction</h3>
+        <p>Future worlds and technology driven stories.</p>
+      </a>
+
+      <a href="{% url 'genre_movies' 'drama' %}" class="genre-card">
+        <div class="genre-icon">🎭</div>
+        <h3 class="genre-name">Drama</h3>
+        <p>Emotional and character driven cinema.</p>
+      </a>
+
+      <a href="{% url 'genre_movies' 'thriller' %}" class="genre-card">
+        <div class="genre-icon">🕵️</div>
+        <h3 class="genre-name">Thriller</h3>
+        <p>Suspense, mystery and unforgettable twists.</p>
+      </a>
+
+      <a href="{% url 'genre_movies' 'action' %}" class="genre-card">
+        <div class="genre-icon">🔥</div>
+        <h3 class="genre-name">Action</h3>
+        <p>High energy cinematic experiences.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-tag">YOUR JOURNEY</div>
+        <h2 class="section-title">Continue Watching</h2>
+        <p class="section-subtitle">Resume movies exactly where you stopped.</p>
+      </div>
+    </div>
+
+    <div class="movie-grid home-watch-grid">
+      {% for item in history %}
+      <a href="{% url 'movie_details' item.movie.id %}" class="movie-card">
+        <div class="movie-poster-wrapper">
+          {% if item.movie.poster_url %}
+          <img
+            src="{{ item.movie.poster_url }}"
+            alt="{{ item.movie.title }}"
+            class="movie-image"
+            loading="lazy"
+          />
+          {% else %}
+          <img
+            src="{% static 'images/default-poster.svg' %}"
+            alt="{{ item.movie.title }}"
+            class="movie-image"
+            loading="lazy"
+          />
+          {% endif %}
+        </div>
+
+        <div class="movie-info">
+          <h3 class="movie-title">{{ item.movie.title }}</h3>
+          <p class="movie-meta">{{ item.progress|default:"0" }}% Completed</p>
+
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              style="width: {{ item.progress|default:0 }}%;"
+            ></div>
+          </div>
+        </div>
+      </a>
+      {% empty %}
+      <div class="empty-card">
+        No watch history available. Start exploring movies.
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

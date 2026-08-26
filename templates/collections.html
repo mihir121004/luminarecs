@@ -1,0 +1,178 @@
+{% extends "base.html" %} {% load static %} {% block title %} LuminaRecs •
+Collections {% endblock %} {% block extra_css %}
+<style>
+  .collections-hero {
+    padding: calc(90px + 50px) 70px 40px;
+    text-align: center;
+  }
+  .collections-tag {
+    color: var(--prestige-gold);
+    font-size: 11px;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .collections-title {
+    font-family: "Cinzel", serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    color: white;
+    margin-bottom: 15px;
+  }
+  .collections-subtitle {
+    color: #9ca3af;
+    max-width: 650px;
+    margin: auto;
+    line-height: 1.9;
+  }
+  .collections-section {
+    padding: 40px 70px 90px;
+  }
+  .collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+  }
+  .collection-card {
+    position: relative;
+    display: block;
+    text-decoration: none;
+    padding: 40px 32px;
+    border-radius: 20px;
+    background: linear-gradient(
+      145deg,
+      rgba(6, 9, 20, 0.95),
+      rgba(2, 3, 7, 0.85)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+    transition: 0.5s;
+  }
+  .collection-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at top right,
+      rgba(195, 155, 52, 0.25),
+      transparent 45%
+    );
+    opacity: 0;
+    transition: 0.5s;
+  }
+  .collection-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--prestige-gold);
+  }
+  .collection-card:hover::before {
+    opacity: 1;
+  }
+  .collection-icon {
+    position: relative;
+    z-index: 2;
+    font-size: 2.6rem;
+    margin-bottom: 18px;
+  }
+  .collection-name {
+    position: relative;
+    z-index: 2;
+    font-family: "Cinzel", serif;
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 12px;
+    transition: 0.4s;
+  }
+  .collection-card:hover .collection-name {
+    color: var(--prestige-gold);
+  }
+  .collection-desc {
+    position: relative;
+    z-index: 2;
+    color: #9ca3af;
+    line-height: 1.8;
+    font-size: 0.92rem;
+    margin-bottom: 15px;
+  }
+  .collection-count {
+    position: relative;
+    z-index: 2;
+    display: inline-block;
+    padding: 7px 16px;
+    border-radius: 20px;
+    background: rgba(195, 155, 52, 0.15);
+    border: 1px solid rgba(195, 155, 52, 0.4);
+    color: var(--prestige-light);
+    font-size: 0.78rem;
+  }
+  .empty-collections {
+    grid-column: 1/-1;
+    padding: 60px 30px;
+    text-align: center;
+    background: rgba(6, 9, 20, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    color: #9ca3af;
+  }
+  @media (max-width: 992px) {
+    .collections-hero {
+      padding: calc(80px + 40px) 35px 30px;
+    }
+    .collections-section {
+      padding: 30px 35px 70px;
+    }
+  }
+  @media (max-width: 768px) {
+    .collections-hero {
+      padding: calc(70px + 40px) 20px 25px;
+    }
+    .collections-section {
+      padding: 25px 20px 60px;
+    }
+    .collection-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<section class="collections-hero">
+  <div class="collections-tag">CURATED CINEMA</div>
+  <h1 class="collections-title">Movie Collections</h1>
+  <p class="collections-subtitle">
+    Hand-picked selections from the LuminaRecs catalog — explore themed journeys
+    through {{ total_movies }} movies.
+  </p>
+</section>
+
+<section class="collections-section">
+  <div class="collection-grid">
+    {% for collection in db_collections %}
+    <a
+      href="{% url 'collection_movies' collection.slug %}"
+      class="collection-card"
+    >
+      <div class="collection-icon">🎞️</div>
+      <h3 class="collection-name">{{ collection.name }}</h3>
+      <p class="collection-desc">
+        {{ collection.description|default:"A curated cinematic selection." }}
+      </p>
+      <span class="collection-count">{{ collection.movies.count }} Movies</span>
+    </a>
+    {% endfor %} {% for collection in fallback_collections %}
+    <a
+      href="{% url 'collection_movies' collection.slug %}"
+      class="collection-card"
+    >
+      <div class="collection-icon">{{ collection.icon }}</div>
+      <h3 class="collection-name">{{ collection.name }}</h3>
+      <p class="collection-desc">{{ collection.description }}</p>
+      <span class="collection-count">Curated Selection</span>
+    </a>
+    {% endfor %} {% if not db_collections and not fallback_collections %}
+    <div class="empty-collections">
+      No collections available yet. Check back soon.
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

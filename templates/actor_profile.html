@@ -1,0 +1,486 @@
+{% extends "base.html" %} {% load static %} {% block title %} {{ actor.name }} |
+LuminaRecs {% endblock %} {% block content %}
+
+<style>
+  :root {
+    --bg: #020307;
+    --panel: #070b14;
+    --gold: #c39b34;
+    --text: #e8e8e8;
+    --muted: #9ca3af;
+  }
+
+  .actor-page {
+    background: var(--bg);
+    color: white;
+    font-family: Inter, sans-serif;
+  }
+
+  /* ==========================
+       FILM GRAIN
+    ========================== */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.08;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ==========================
+       HERO
+    ========================== */
+  .hero {
+    min-height: 95vh;
+    display: flex;
+    align-items: center;
+    padding: 0 8%;
+    background:
+      linear-gradient(90deg, rgba(2, 3, 7, 0.95), rgba(2, 3, 7, 0.55)),
+      url("{% if actor.profile_image %}{{ actor.profile_image }}{% else %}{% static 'images/cinema-bg.svg' %}{% endif %}");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-content {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 70px;
+    align-items: center;
+    max-width: 1400px;
+  }
+
+  .actor-image {
+    height: 520px;
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+  }
+
+  .actor-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .tag {
+    color: var(--gold);
+    letter-spacing: 0.5em;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-family: Cinzel, serif;
+    font-size: 5rem;
+    font-style: italic;
+    margin: 20px 0;
+  }
+
+  .meta {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+    color: #c5ccd8;
+  }
+
+  .meta span {
+    border-left: 1px solid var(--gold);
+    padding-left: 15px;
+  }
+
+  .bio {
+    margin-top: 30px;
+    max-width: 850px;
+    line-height: 1.9;
+    color: #cbd5e1;
+    font-size: 17px;
+  }
+
+  /* ==========================
+       SECTIONS
+    ========================== */
+  .section {
+    padding: 80px 8%;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+  }
+
+  .section-header h2 {
+    font-family: Cinzel, serif;
+    font-size: 2.2rem;
+    font-style: italic;
+  }
+
+  .section-header span {
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    font-size: 12px;
+  }
+
+  /* ==========================
+       STATS
+    ========================== */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+  }
+
+  .stat {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 35px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    transition: 0.4s;
+  }
+
+  .stat:hover {
+    transform: translateY(-10px);
+    border-color: var(--gold);
+  }
+
+  .stat h3 {
+    font-size: 2rem;
+    color: var(--gold);
+  }
+
+  /* ==========================
+       MOVIES
+    ========================== */
+  .movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 35px;
+  }
+
+  .movie-card {
+    position: relative;
+  }
+
+  .poster {
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    background: var(--panel);
+  }
+
+  .poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.5s;
+  }
+
+  .movie-card:hover img {
+    transform: scale(1.08);
+  }
+
+  .rating {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: black;
+    color: var(--gold);
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .movie-title {
+    font-family: Cinzel, serif;
+    font-size: 1.3rem;
+    margin-top: 15px;
+  }
+
+  .movie-meta {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* ==========================
+       TIMELINE
+    ========================== */
+  .timeline {
+    border-left: 2px solid var(--gold);
+    padding-left: 35px;
+  }
+
+  .timeline-item {
+    margin-bottom: 40px;
+  }
+
+  .year {
+    color: var(--gold);
+    font-family: Cinzel, serif;
+    font-size: 2rem;
+  }
+
+  .movie-name {
+    font-size: 1.2rem;
+    color: #ddd;
+  }
+
+  /* ==========================
+       AI PANEL
+    ========================== */
+  .ai {
+    background: linear-gradient(
+      135deg,
+      rgba(195, 155, 52, 0.12),
+      rgba(255, 255, 255, 0.03)
+    );
+    border: 1px solid rgba(195, 155, 52, 0.3);
+    padding: 45px;
+    line-height: 2;
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      min-height: auto;
+      padding: 120px 20px 70px;
+      background-position: center;
+    }
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+      width: 100%;
+      text-align: center;
+      grid-template-columns: 1fr;
+    }
+    .actor-page {
+      width: auto;
+      height: auto;
+      margin: auto;
+      border-radius: 12px;
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      line-height: 1.2;
+    }
+    .tag {
+      font-size: 10px;
+      letter-spacing: 0.35em;
+    }
+    .meta {
+      justify-content: center;
+      gap: 15px;
+      font-size: 0.85rem;
+    }
+    .bio {
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+    .section {
+      padding: 50px 20px;
+    }
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    .section-header h2 {
+      font-size: 1.8rem;
+    }
+
+    .stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .stat {
+      padding: 20px 10px;
+    }
+    .stat h3 {
+      font-size: 1.4rem;
+    }
+    /* MOVIES */
+
+    .movie-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+    .movie-title {
+      font-size: 1rem;
+    }
+    .movie-meta {
+      font-size: 0.75rem;
+    }
+    /* TIMELINE */
+    .timeline {
+      padding-left: 20px;
+    }
+    .year {
+      font-size: 1.5rem;
+    }
+    .movie-name {
+      font-size: 1rem;
+    }
+    /* AI PANEL */
+    .ai {
+      padding: 25px;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+  }
+  @media (max-width: 480px) {
+    .hero {
+      padding-top: 100px;
+    }
+
+    .actor-image {
+      width: 200px;
+      height: 280px;
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+    }
+
+    .meta {
+      flex-direction: column;
+    }
+
+    .meta span {
+      border-left: none;
+      border-bottom: 1px solid var(--gold);
+      padding-bottom: 8px;
+    }
+
+    .stats {
+      grid-template-columns: 1fr;
+    }
+
+    .movie-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .poster {
+      border-radius: 10px;
+    }
+
+    .section-header h2 {
+      font-size: 1.5rem;
+    }
+  }
+</style>
+
+<div class="actor-page">
+  <div class="grain"></div>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div class="actor-image">
+        <img src="{{ actor.profile_image }}" alt="{{ actor.name }}" />
+      </div>
+
+      <div>
+        <div class="tag">LuminaRecs Artist Archive</div>
+        <h1>{{ actor.name }}</h1>
+
+        <div class="meta">
+          <span>Born: {{ actor.birthday|default:"Unknown" }}</span>
+          <span>{{ actor.known_for_department }}</span>
+          <span>Popularity: {{ actor.popularity|floatformat:0 }}</span>
+        </div>
+
+        <div class="bio">
+          {{ actor.biography|default:"Biography unavailable." }}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Career Overview</h2>
+      <span>LUMINA DATABASE</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <h3>{{ movies.count }}</h3>
+        <p>Movies</p>
+      </div>
+
+      <div class="stat">
+        <h3>{{ actor.popularity|floatformat:0 }}</h3>
+        <p>Popularity</p>
+      </div>
+
+      <div class="stat">
+        <h3>{{ actor.birthday|default:"—" }}</h3>
+        <p>Birth Date</p>
+      </div>
+
+      <div class="stat">
+        <h3>{{ actor.known_for_department }}</h3>
+        <p>Department</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Filmography Timeline</h2>
+      <span>CAREER HISTORY</span>
+    </div>
+
+    <div class="timeline">
+      {% for movie in movies %}
+      <div class="timeline-item">
+        <div class="year">{{ movie.release_year }}</div>
+        <div class="movie-name">{{ movie.title }}</div>
+      </div>
+      {% empty %}
+      <p>No movies available.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Popular Performances</h2>
+      <span>FEATURED FILMS</span>
+    </div>
+
+    <div class="movie-grid">
+      {% for movie in movies %}
+      <div class="movie-card">
+        <div class="poster">
+          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
+          <div class="rating">★ {{ movie.vote_average }}</div>
+        </div>
+        <div class="movie-title">{{ movie.title }}</div>
+        <div class="movie-meta">{{ movie.genres }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Lumina AI Intelligence</h2>
+      <span>AI ANALYSIS</span>
+    </div>
+
+    <div class="ai">
+      🤖 Performance Profile
+      <br /><br />
+      {{ actor.name }} has contributed to {{ movies.count }} cinematic projects.
+      <br /><br />
+      ✓ Audience recognition analysis<br />
+      ✓ Genre influence tracking<br />
+      ✓ Film popularity evaluation<br />
+      ✓ Cinematic contribution mapping
+    </div>
+  </section>
+</div>
+
+{% endblock %}
