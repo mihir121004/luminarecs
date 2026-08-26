@@ -486,10 +486,11 @@ LuminaRecs Collections {% endblock %} {% block extra_css %}
     .nav-links {
       position: fixed;
       top: 0;
-      right: -100%;
+      right: 0;
       width: 85%;
       max-width: 320px;
-      height: 100vh;
+      height: 100vh;   /* fallback */
+      height: 100dvh;  /* matches visible viewport on mobile */
 
       background: rgba(2, 3, 7, 0.98);
       backdrop-filter: blur(30px);
@@ -500,14 +501,20 @@ LuminaRecs Collections {% endblock %} {% block extra_css %}
       align-items: center;
       gap: 28px;
 
-      transition: 0.4s ease;
+      transform: translateX(100%);
+      visibility: hidden;
+      transition: transform 0.4s ease, visibility 0s linear 0.4s;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       z-index: 100000;
 
       border-left: 1px solid rgba(195, 155, 52, 0.25);
     }
 
     .nav-links.active {
-      right: 0;
+      transform: translateX(0);
+      visibility: visible;
+      transition: transform 0.4s ease, visibility 0s;
     }
 
     .nav-links a {
