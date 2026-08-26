@@ -613,7 +613,18 @@
     <div class="matte-bottom"></div>
 
     <div class="hero-video">
-      <video autoplay muted loop playsinline>
+      <video
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="{% static 'images/landing-poster.jpg' %}"
+      >
+        <source
+          src="{% static 'videos/landing-portrait.mp4' %}"
+          media="(max-width: 768px)"
+          type="video/mp4"
+        />
         <source src="{% static 'videos/landing.mp4' %}" type="video/mp4" />
       </video>
     </div>
@@ -750,5 +761,14 @@
         &copy; 2026 LuminaRecs &bull; AI Movie Recommendation Platform
       </div>
     </footer>
+
+    <script>
+      /* Respect reduced-motion: freeze backgrounds on their poster frame. */
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document
+          .querySelectorAll("video")
+          .forEach((v) => v.removeAttribute("autoplay"));
+      }
+    </script>
   </body>
 </html>

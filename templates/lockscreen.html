@@ -121,6 +121,13 @@ rel="stylesheet">
         filter: contrast(1.3) brightness(0.28) sepia(.8);
       }
 
+      /* Portrait screens get the native 9:16 crop - no extra zoom needed. */
+      @media (max-width: 768px) {
+        .video-projection {
+          transform: none;
+        }
+      }
+
       .studio-slate {
         position: fixed;
         inset: 0;
@@ -330,7 +337,18 @@ rel="stylesheet">
     <div class="projector-lens"></div>
 
     <div class="video-projection">
-      <video autoplay loop muted playsinline>
+      <video
+        autoplay
+        loop
+        muted
+        playsinline
+        poster="{% static 'images/cinema-intro-poster.jpg' %}"
+      >
+        <source
+          src="{% static 'videos/cinema-intro-portrait.mp4' %}"
+          media="(max-width: 768px)"
+          type="video/mp4"
+        />
         <source src="{% static 'videos/cinema-intro.mp4' %}" type="video/mp4">
       </video>
     </div>
@@ -404,6 +422,15 @@ rel="stylesheet">
           triggerRedirect();
         }
       });
+    </script>
+
+    <script>
+      /* Respect reduced-motion: freeze backgrounds on their poster frame. */
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document
+          .querySelectorAll("video")
+          .forEach((v) => v.removeAttribute("autoplay"));
+      }
     </script>
   </body>
 </html>
