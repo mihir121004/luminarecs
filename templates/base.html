@@ -4,15 +4,42 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
 
     <title>{% block title %}LuminaRecs{% endblock %}</title>
 
-    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="{% static 'images/favicon.svg' %}"
+    />
 
+    <!-- Performance: preconnect to external origins used below -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Security: CSP meta tag as defense-in-depth (middleware sets the real header) -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self';"
+    />
+
+    <!-- Theme preference detection for JS-driven toggle -->
+    <script>
+      // Early theme detection to prevent FOUC (Flash of Unstyled Content)
+      (function () {
+        const saved = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        const initial = saved || (prefersDark ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", initial);
+      })();
+    </script>
 
     <style>
             /* =====================================================
@@ -31,8 +58,34 @@
               --transition: all .45s cubic-bezier(.16, 1, .3, 1);
             }
 
-            /* =====================================================
-               RESET
+            /* ===== Skip link (keyboard users only) ===== */
+            .skip-link {
+              position: absolute;
+              top: -40px;
+              left: 0;
+              background: var(--prestige-gold);
+              color: #000;
+              padding: 8px 16px;
+              text-decoration: none;
+              z-index: 1001;
+              transition: top 0.3s;
+              font-weight: 600;
+            }
+            .skip-link:focus {
+              top: 0;
+            }
+
+            /* ===== Skeleton loader for media placeholders ===== */
+            .skeleton {
+              background: linear-gradient(90deg, #1a1a2e 25%, #16213e 50%, #1a1a2e 75%);
+              background-size: 200% 100%;
+              animation: shimmer 1.8s infinite ease-in-out;
+              border-radius: 4px;
+            }
+                        @keyframes shimmer {
+              0% { background-position: 200%; }
+              100% { background-position: -200%; }
+            }
             ===================================================== */
             * {
               margin: 0;
@@ -196,9 +249,49 @@
             /* MOBILE NAVBAR BUTTON */
             .menu-toggle {
               display: none;
+              touch-action: manipulation; /* kills 300ms ghost-click (Oppo/Realme MediaTek) */
               font-size: 1.8rem;
               color: white;
               cursor: pointer;
+            }
+
+            /* ===== CSS hamburger icon (crisp on ALL devices, no Unicode glyphs) ===== */
+            .menu-toggle .hamburger,
+            .menu-toggle .hamburger::before,
+            .menu-toggle .hamburger::after {
+              content: "";
+              display: block;
+              position: absolute;
+              left: 50%;
+              width: 22px;
+              height: 2px;
+              background: #fff;
+              border-radius: 2px;
+              transform: translateX(-50%);
+              transition: transform 0.3s ease, opacity 0.2s ease, margin-top 0.3s ease;
+            }
+            .menu-toggle .hamburger {
+              top: 50%;
+            }
+            .menu-toggle .hamburger::before {
+              top: 50%;
+              margin-top: -8px;
+            }
+            .menu-toggle .hamburger::after {
+              top: 50%;
+              margin-top: 8px;
+            }
+            /* Open state: three bars morph into an "X" */
+            .menu-toggle.open .hamburger {
+              background: transparent;
+            }
+            .menu-toggle.open .hamburger::before {
+              margin-top: 0;
+              transform: translateX(-50%) rotate(45deg);
+            }
+            .menu-toggle.open .hamburger::after {
+              margin-top: 0;
+              transform: translateX(-50%) rotate(-45deg);
             }
 
             /* =====================================================
@@ -1096,15 +1189,26 @@
   </head>
 
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="film-grain"></div>
     <div class="matte-top"></div>
     <div class="matte-bottom"></div>
     <div class="projector-lens"></div>
     <div class="menu-overlay" id="menuOverlay"></div>
-    <nav class="navbar">
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
       <a href="{% url 'homepage' %}" class="logo"> Lumina<span>Recs</span> </a>
 
-      <div class="menu-toggle" id="menuToggle">☰</div>
+      <div
+        class="menu-toggle"
+        id="menuToggle"
+        role="button"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="navLinks"
+        tabindex="0"
+      >
+        <span class="hamburger"></span>
+      </div>
 
       <div class="nav-links" id="navLinks">
         <a
@@ -1142,7 +1246,9 @@
       </div>
     </nav>
 
-    <main>{% block content %} {% endblock %}</main>
+    <main id="main-content" tabindex="-1">
+      {% block content %} {% endblock %}
+    </main>
 
     <footer class="footer">
       <div class="footer-logo">Lumina<span>Recs</span></div>
@@ -1170,32 +1276,110 @@
     <script>
       /* Respect reduced-motion: freeze background videos on poster frames. */
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        document.querySelectorAll("video").forEach((v) => v.removeAttribute("autoplay"));
+        document
+          .querySelectorAll("video")
+          .forEach((v) => v.removeAttribute("autoplay"));
       }
     </script>
-  </body>
   <script>
     const menuToggle = document.getElementById("menuToggle");
     const navLinks = document.getElementById("navLinks");
+    const menuOverlay = document.getElementById("menuOverlay");
 
-    menuToggle.addEventListener("click", () => {
-      navLinks.classList.toggle("active");
+    // ===== Keyboard focus trap for mobile menu =====
+    const focusableSelectors =
+      'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])';
+    function trapFocus(e) {
+      if (!navLinks.classList.contains("active")) return;
+      const focusable = Array.from(
+        navLinks.querySelectorAll(focusableSelectors),
+      ).filter(
+        (el) =>
+          el.offsetWidth > 0 ||
+          el.offsetHeight > 0 ||
+          el === document.activeElement,
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.key === "Tab") {
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+    document.addEventListener("keydown", trapFocus);
 
-      if (navLinks.classList.contains("active")) {
-        menuToggle.innerHTML = "✕";
-        document.body.style.overflow = "hidden";
+    function updateAria(isOpen) {
+      menuToggle.setAttribute("aria-expanded", isOpen);
+    }
+
+    function toggleMenu() {
+      const isOpen = navLinks.classList.toggle("active");
+      document.body.style.overflow = isOpen ? "hidden" : "auto";
+
+      if (isOpen) {
+        menuToggle.classList.add("open");
+        menuOverlay.classList.add("active");
+        const firstLink = navLinks.querySelector(focusableSelectors);
+        setTimeout(() => firstLink && firstLink.focus(), 100);
       } else {
-        menuToggle.innerHTML = "☰";
-        document.body.style.overflow = "auto";
+        menuToggle.classList.remove("open");
+        menuOverlay.classList.remove("active");
+        menuToggle.focus();
+      }
+      updateAria(isOpen);
+    }
+
+    menuToggle.addEventListener("click", toggleMenu);
+
+    // Keyboard: Enter or Space toggles
+    menuToggle.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleMenu();
       }
     });
 
+    // Close menu when a nav link is clicked
     document.querySelectorAll("#navLinks a").forEach((link) => {
       link.addEventListener("click", () => {
-        navLinks.classList.remove("active");
-        menuToggle.innerHTML = "☰";
-        document.body.style.overflow = "auto";
+        if (navLinks.classList.contains("active")) {
+          navLinks.classList.remove("active");
+          menuToggle.classList.remove("open");
+          menuOverlay.classList.remove("active");
+          document.body.style.overflow = "auto";
+          updateAria(false);
+        }
       });
     });
+
+    // Escape always closes an open menu
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && navLinks.classList.contains("active")) {
+        navLinks.classList.remove("active");
+        menuToggle.classList.remove("open");
+        menuOverlay.classList.remove("active");
+        document.body.style.overflow = "auto";
+        menuToggle.focus();
+        updateAria(false);
+      }
+    });
+
+    // Clicking overlay closes menu
+    if (menuOverlay) {
+      menuOverlay.addEventListener("click", () => {
+        navLinks.classList.remove("active");
+        menuToggle.classList.remove("open");
+        menuOverlay.classList.remove("active");
+        document.body.style.overflow = "auto";
+        updateAria(false);
+      });
+    }
   </script>
+  </body>
 </html>
