@@ -198,32 +198,20 @@ class Command(BaseCommand):
         names = [TMDB_GENRES.get(gid) for gid in genre_ids or []]
         return ", ".join(n for n in names if n)
 
-    def _unique_slug(self, title, tmdb_id, seen_slugs):
-        base = slugify(title)[:240] or "movie"
-        if base not in seen_slugs:
-            seen_slugs.add(base)
-            return base
-        slug = f"{base}-{tmdb_id}"          # duplicate title -> suffix id
-        while slug in seen_slugs:
-            slug += "x"
-        seen_slugs.add(slug)
-        return slug
+    def _unique_slug(self, title, tmdb_id):
+        """Deterministic + collision-proof: title + tmdb id.
+
+        At 10k+ scale duplicate titles are guaranteed ('Scary Movie'...),
+        and slug uniqueness is DB-enforced - so always suffix the tmdb id
+        instead of racing availability checks.
+        """
+        base = slugify(title)[:235] or "movie"
+        return f"{base}-{tmdb_id}"
 
     def bulk_write(self, items):
         """Upsert list-payload rows; enrich-only fields stay untouched."""
-        candidates = [
-            slugify(item.get("title") or "")[:240] or "movie"
-            for item in items.values()
-        ]
-        taken_slugs = set(
-            Movie.objects.filter(slug__in=candidates)
-            .exclude(tmdb_id__in=items.keys())
-            .values_list("slug", flat=True)
-        )
-
         now = timezone.now()
         rows = []
-        seen_slugs = set(taken_slugs)
 
         for tmdb_id, item in items.items():
             release_date = item.get("release_date") or None
@@ -232,7 +220,7 @@ class Command(BaseCommand):
             movie = Movie(
                 tmdb_id=tmdb_id,
                 title=item.get("title") or "",
-                slug=self._unique_slug(item.get("title"), tmdb_id, seen_slugs),
+                slug=self._unique_slug(item.get("title"), tmdb_id),
                 overview=item.get("overview") or "",
                 genres=self._genre_names(item.get("genre_ids")),
                 poster_url=(
@@ -255,6 +243,7 @@ class Command(BaseCommand):
 
         written = 0
         from django.db import connection
+        from django.db.utils import IntegrityError
 
         for start in range(0, len(rows), self.batch_size):
             batch = rows[start:start + self.batch_size]
@@ -267,7 +256,14 @@ class Command(BaseCommand):
             # Postgres/SQLite require it explicitly.
             if connection.vendor != "mysql":
                 kwargs["unique_fields"] = ["tmdb_id"]
-            Movie.objects.bulk_create(batch, **kwargs)
+            try:
+                Movie.objects.bulk_create(batch, **kwargs)
+            except IntegrityError as exc:
+                # Never let one bad batch kill a multi-hour import.
+                self.stdout.write(
+                    self.style.ERROR(f"Batch @{start} skipped: {exc}")
+                )
+                continue
             self._sync_genres(batch)
             written += len(batch)
             self.stdout.write(f"  upserted {written}/{len(rows)}")
