@@ -87,6 +87,30 @@ if not DEBUG:
             "let attacker-controlled subdomains pass Host-header checks. "
             "List exact domains instead."
         )
+    # Redirect-loop guard: behind Caddy/Cloudflare Django receives plain
+    # HTTP over the internal Docker network. If it also tries to force
+    # HTTPS itself (SECURE_SSL_REDIRECT) without trusting the proxy's
+    # X-Forwarded-Proto, every request redirects forever.
+    _ssl_redirect = os.getenv('SECURE_SSL_REDIRECT', 'True').lower() == 'true'
+    _trust_proxy = os.getenv('TRUST_PROXY', 'False').lower() == 'true'
+    if _ssl_redirect and not _trust_proxy:
+        raise RuntimeError(
+            "Refusing to start: SECURE_SSL_REDIRECT=True while TRUST_PROXY "
+            "is not enabled. Behind a TLS proxy (Caddy/Cloudflare) Django "
+            "sees plain HTTP internally -> infinite redirect loop.\n"
+            "Fix: set TRUST_PROXY=True in .env (recommended), or set "
+            "SECURE_SSL_REDIRECT=False to let the proxy do redirects."
+        )
+    # Dev .env files commonly carry SECURE_HSTS_SECONDS=0; that must never
+    # leak into a production boot or browsers lose HSTS protection entirely.
+    _hsts = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
+    if _hsts <= 0:
+        raise RuntimeError(
+            "Refusing to start: SECURE_HSTS_SECONDS <= 0 while DEBUG=False. "
+            "This looks like a development .env copied to production. Set "
+            "e.g. SECURE_HSTS_SECONDS=31536000 (plus INCLUDE_SUBDOMAINS/"
+            "PRELOAD=True)."
+        )
 
 
 # Application definition

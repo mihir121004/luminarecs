@@ -51,14 +51,21 @@ class SecurityHeadersMiddleware:
             response['X-CSP-Nonce'] = nonce
             request.csp_nonce = nonce
 
-            # Content Security Policy with nonce support (replaces unsafe-inline)
+            # Content Security Policy with nonce support.
+            # NOTE: templates currently rely on inline <style>/<script>
+            # (no nonce attributes), plus these verified external origins:
+            #   styles  -> fonts.googleapis.com      (base.html font <link>)
+            #   scripts -> cdn.jsdelivr.net          (Chart.js, profile page)
+            #   frames  -> www.youtube.com[/nocookie] (trailer embeds)
+            # Keep this list in sync with what templates actually load.
             response['Content-Security-Policy'] = (
                 "default-src 'self'; "
-                f"script-src 'self' 'nonce-{nonce}'; "
-                f"style-src 'self' 'nonce-{nonce}'; "
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                "font-src 'self' data: https://fonts.gstatic.com; "
                 "img-src 'self' data: https:; "
-                "font-src 'self' data:; "
                 "connect-src 'self' https:; "
+                "frame-src https://www.youtube.com https://www.youtube-nocookie.com; "
                 "frame-ancestors 'self'; "
                 "upgrade-insecure-requests"
             )
