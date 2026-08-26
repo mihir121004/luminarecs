@@ -213,7 +213,7 @@ def lockscreen(request):
 def landing(request):
     return render(request, "landing.html")
 
-
+@login_required
 def homepage(request):
     """Main LuminaRecs homepage."""
 
