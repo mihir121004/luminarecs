@@ -142,7 +142,12 @@ class Command(BaseCommand):
     # ==================================================
 
     def collect_items(self, target):
-        """Pull list pages from several endpoints until `target` unique ids."""
+        """Pull list pages from several endpoints until `target` NEW movies
+        have been gathered (ids already in the DB don't count toward the
+        target, so repeated runs progressively deepen into the catalogue)."""
+        existing_ids = set(
+            Movie.objects.values_list("tmdb_id", flat=True)
+        )
         sources = [
             ("/movie/popular", {}),
             ("/movie/top_rated", {}),
@@ -170,20 +175,23 @@ class Command(BaseCommand):
 
                 results = data.get("results", [])
                 for item in results:
-                    if item.get("id"):
-                        items[item["id"]] = item
+                    item_id = item.get("id")
+                    # Only genuinely new movies advance the target.
+                    if item_id and item_id not in existing_ids \
+                            and item_id not in items:
+                        items[item_id] = item
 
                 if page % 25 == 0 or len(items) >= target:
                     self.stdout.write(
                         f"  {endpoint} p.{page} -> "
-                        f"{len(items)} unique movies collected"
+                        f"{len(items)} new movies collected"
                     )
                 if len(results) < 20:
                     break  # source exhausted
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Collected {len(items)} unique movies "
+                f"Collected {len(items)} NEW movies "
                 f"in {requests_made} requests"
             )
         )
