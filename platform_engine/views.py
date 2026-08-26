@@ -509,7 +509,14 @@ def signup(request):
             return redirect("signup")
 
         user = User.objects.create_user(username=username, email=email, password=password)
-        auth_login(request, user)
+        # With multiple AUTHENTICATION_BACKENDS configured (credentials +
+        # Google/GitHub OAuth), Django requires an explicit backend when
+        # logging in a user that was NOT obtained through authenticate().
+        auth_login(
+            request,
+            user,
+            backend="django.contrib.auth.backends.ModelBackend",
+        )
         messages.success(request, "Account created successfully")
         return redirect("onboarding")
 

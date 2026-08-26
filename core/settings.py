@@ -1,5 +1,6 @@
 
 import os
+import sys
 from pathlib import Path
 import logging
 
@@ -12,6 +13,22 @@ except ImportError:
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# ------------------------------------------------------------------
+# SINGLE-FILE ENVIRONMENT STRATEGY
+# This is the ONLY settings module (dev, CI and production). Behaviour
+# is selected through environment variables (.env locally, real env in
+# production/CI - see .github/workflows/ci.yml).
+#
+# `TESTING` auto-detects `manage.py test` and swaps in fast/hermetic
+# pieces (MD5 hasher, in-memory cache) without needing a separate
+# settings_test.py. Django still creates an isolated test database.
+# ------------------------------------------------------------------
+TESTING = 'test' in sys.argv
+
+if TESTING:
+    # MD5 is wildly faster than PBKDF2 when tests create many users.
+    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
 
 # Quick-start development settings - unsuitable for production
@@ -270,24 +287,43 @@ DEFAULT_FROM_EMAIL = os.getenv(
 )
 
 #=========================
-#REDIS CACHE
+# REDIS CACHE (falls back to in-memory during tests)
 #=========================
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1'),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "SOCKET_CONNECT_TIMEOUT": 5,
-            "SOCKET_TIMEOUT": 5,
-            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+if TESTING:
+    # Hermetic test cache: no Redis service required.
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "SOCKET_CONNECT_TIMEOUT": 5,
+                "SOCKET_TIMEOUT": 5,
+                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+            }
+        }
+    }
 
 # Cache TTL for recommendations (in seconds)
 CACHE_TTL = int(os.getenv('CACHE_TTL', '3600'))
+
+# ===========================
+# CELERY (inert unless/until a celery worker is introduced; kept from the
+# former settings_production.py so future task queues need no new config)
+# ===========================
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
 
 CRONJOBS = [
 

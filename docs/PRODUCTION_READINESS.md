@@ -17,13 +17,13 @@ LuminaRecs has been transformed from a development project to a **production-rea
   - Moved all hardcoded secrets to environment variables (SECRET_KEY, DB_PASSWORD, etc.)
   - Created `.env.example` template with all required variables
   - Created `.env.development` for local development
-  - Created `settings_production.py` as reference for production configuration
+  - Production configuration lives in `core/settings.py` via environment variables
   - Updated `core/settings.py` to load environment variables via `python-dotenv`
 
 - **Files created/modified**:
   - `.env.example` - Template with all environment variables
   - `.env.development` - Development environment configuration
-  - `core/settings_production.py` - Production configuration reference
+  - `core/settings.py` - production behaviour selected through environment variables
   - `core/settings.py` - Updated to use environment variables
 
 - **How to use**:
@@ -357,7 +357,7 @@ LuminaRecs has been transformed from a development project to a **production-rea
 ### Configuration
 1. `.env.example` - Environment variables template
 2. `.env.development` - Development configuration
-3. `core/settings_production.py` - Production settings reference
+3. `core/settings.py` - single settings module (env-driven)
 4. `DEPLOYMENT_GUIDE.md` - Deployment instructions
 
 ### Testing

@@ -32,7 +32,7 @@ Your LuminaRecs application has been comprehensively transformed from a developm
 ```
 ✅ .env.example              - Production environment template
 ✅ .env.development          - Development environment
-✅ core/settings_production.py - Production settings reference
+✅ core/settings.py - single env-driven settings module
 ```
 
 ### 📚 Documentation (52+ KB)
