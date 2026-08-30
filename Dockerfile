@@ -20,7 +20,12 @@ COPY . .
 
 # Static files collected at build time (faster cold start); ownership fixed
 # so the unprivileged runtime user can still re-collect on boot.
-RUN python manage.py collectstatic --noinput \
+# DEBUG=true is scoped to THIS build step only: .env is excluded from the
+# build context (see .dockerignore), so with production defaults the
+# production boot guard in core/settings.py would refuse to run here.
+# (Settings parse DEBUG as .lower() == 'true', so 'true' — not '1'.)
+# Nothing secret is baked in; runtime env always overrides.
+RUN DEBUG=true python manage.py collectstatic --noinput \
  && addgroup --system --gid 1000 app \
  && adduser --system --uid 1000 --ingroup app app \
  && mkdir -p /app/media /app/staticfiles \

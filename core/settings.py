@@ -183,6 +183,14 @@ DATABASES = {
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '3306'),
         'CONN_MAX_AGE': 600,  # Connection pooling
+        # Managed MySQL services (TiDB Cloud Starter, Aiven, ...) require TLS.
+        # Set DB_SSL_CA to a CA bundle path (e.g. certifi's bundle) to enable
+        # it; the PyMySQL driver expects an "ssl" dict in the kwargs.
+        **(
+            {"OPTIONS": {"ssl": {"ca": os.getenv("DB_SSL_CA")}}}
+            if os.getenv("DB_SSL_CA")
+            else {}
+        ),
     }
 }
 
@@ -399,6 +407,16 @@ if TESTING:
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
+    }
+elif os.getenv('CACHE_BACKEND', '').strip().lower() == 'locmem':
+    # Redis-free mode for minimal deployments (e.g. free tiers). The cache is
+    # per-process and lost on restart; sessions are DB-backed and Celery
+    # currently registers no tasks, so nothing else depends on Redis.
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "luminarecs-default",
         }
     }
 else:

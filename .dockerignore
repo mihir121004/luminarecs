@@ -18,3 +18,9 @@ scripts/.bin/
 certs/
 .vscode/
 .idea/
+
+# Ship the trained ML artifacts (~16 MB) so deployed images (e.g. Hugging Face
+# Spaces free tier) serve working recommendations out of the box. Negations
+# must come AFTER the exclusion rules above to take effect.
+!platform_engine/ml_engine/model_data/
+!platform_engine/ml_engine/model_data/**
