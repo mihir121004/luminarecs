@@ -22,7 +22,7 @@ Analytics Dashboard {% endblock %} {% block extra_css %}
   }
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
     gap: 25px;
   }
   .stat-card {
@@ -60,7 +60,7 @@ Analytics Dashboard {% endblock %} {% block extra_css %}
   }
   .lists-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
     gap: 30px;
   }
   .list-panel {
@@ -68,6 +68,7 @@ Analytics Dashboard {% endblock %} {% block extra_css %}
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 22px;
     padding: 35px;
+    min-width: 0; /* allow the grid track to shrink below content min on phones */
   }
   .list-panel h3 {
     font-family: "Cinzel", serif;
@@ -111,6 +112,7 @@ Analytics Dashboard {% endblock %} {% block extra_css %}
     min-width: 0;
   }
   .rank-title {
+    display: block; /* inline span ignores overflow:hidden — block makes ellipsis work */
     color: white;
     font-weight: 600;
     font-size: 0.98rem;

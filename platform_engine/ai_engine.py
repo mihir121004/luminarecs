@@ -15,6 +15,7 @@ def generate_user_ai_profile(user):
         insight.personality = "Cinema Beginner"
         insight.taste_score = 50
         insight.movie_analyzed = 0
+        insight.accuracy = 50
         insight.ai_summary = (
             "Start watching movies to help LuminaRecs learn your cinematic preferences."
         )
@@ -43,6 +44,7 @@ def generate_user_ai_profile(user):
         insight.personality=personality
         insight.taste_score=taste_score
         insight.movie_analyzed=total
+        insight.accuracy=min(50 + total * 2, 100)
 
         insight.ai_summary=f"""
 You are {personality}.

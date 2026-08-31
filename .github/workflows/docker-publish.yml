@@ -1,0 +1,70 @@
+# ==========================================================================
+# BUILD & PUBLISH → GHCR
+#
+#   Runs on every push to master (and manually via "Run workflow").
+#   Produces:  ghcr.io/<owner>/<repo>:latest   (+ :sha-<commit> pins)
+#
+#   ClawCloud Run (or any container platform) pulls this image — no local
+#   Docker build ever needed. First build is slow (~15-25 min: torch +
+#   faiss-cpu wheels); later builds reuse the GitHub Actions layer cache.
+#
+#   NOTE: the first push creates a PRIVATE ghcr package. Make it public
+#   (GitHub → Packages → luminarecs → Package settings) so ClawCloud can
+#   pull it without registry credentials, or add a pull secret instead
+#   (see docs/CLAWCLOUD_DEPLOYMENT.md).
+# ==========================================================================
+name: Docker Publish
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'screenshots/**'
+  workflow_dispatch:
+
+# don't burn build minutes on superseded pushes
+concurrency:
+  group: docker-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}   # lowercased automatically
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

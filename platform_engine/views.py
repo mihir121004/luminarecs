@@ -978,7 +978,7 @@ def profile(request):
         "watch_history": recent_watch_history,
         "continue_watching": continue_watching,
         "taste_score": taste_score,
-        "movie_personality": taste_profile.personality,
+        "movie_personality": ai_profile.personality,
         "watching_style": taste_profile.watching_style,
         "preferred_experience": taste_profile.preferred_experience,
         "profile_completion": profile_completion,
@@ -1033,6 +1033,18 @@ def discover(request):
         )
     }
 
+    # Curated collections: DB rows first, then CURATED_FALLBACK_COLLECTIONS
+    # for slugs with no DB row. Template renders one loop (no hardcoded cards).
+    db_collections = list(
+        Collection.objects.prefetch_related("movies")
+    )
+    existing_slugs = {c.slug for c in db_collections}
+    fallback_collections = [
+        c for c in CURATED_FALLBACK_COLLECTIONS
+        if c["slug"] not in existing_slugs
+    ]
+    collections = db_collections + fallback_collections
+
     return render(
         request,
         "discover.html",
@@ -1042,7 +1054,7 @@ def discover(request):
             "recommendations": recommendations,
             "hidden_gems": hidden_gems,
             "ai_report": ai_report,
-            "collections": Collection.objects.prefetch_related("movies"),
+            "collections": collections,
             "confidence": 96,
         },
     )
@@ -1075,6 +1087,13 @@ def collection_movies(request, slug):
     ).first()
 
 
+    # Shared curated fallback metadata for this slug (None for unknown slugs).
+    fallback_meta = next(
+        (c for c in CURATED_FALLBACK_COLLECTIONS if c["slug"] == slug),
+        None,
+    )
+
+
     # If database collection exists
     if collection:
 
@@ -1104,11 +1123,10 @@ def collection_movies(request, slug):
             "-vote_average"
         )
 
-        title = "Hidden Gems"
+        # Sourced from CURATED_FALLBACK_COLLECTIONS.
+        title = fallback_meta["name"]
 
-        description = (
-            "Underrated masterpieces waiting to be discovered."
-        )
+        description = fallback_meta["description"]
 
         similar_collections = Collection.objects.all()[:4]
 
@@ -1121,11 +1139,10 @@ def collection_movies(request, slug):
             "-vote_average"
         )
 
-        title = "Space Odyssey"
+        # Sourced from CURATED_FALLBACK_COLLECTIONS.
+        title = fallback_meta["name"]
 
-        description = (
-            "Epic adventures beyond Earth."
-        )
+        description = fallback_meta["description"]
 
         similar_collections = Collection.objects.all()[:4]
 
@@ -1139,11 +1156,10 @@ def collection_movies(request, slug):
             "-vote_average"
         )
 
-        title = "Mind Bending Cinema"
+        # Sourced from CURATED_FALLBACK_COLLECTIONS.
+        title = fallback_meta["name"]
 
-        description = (
-            "Movies that challenge reality."
-        )
+        description = fallback_meta["description"]
 
         similar_collections = Collection.objects.all()[:4]
 
@@ -1207,6 +1223,35 @@ def collection_movies(request, slug):
     )
 
 # =====================================================
+# CURATED FALLBACK COLLECTIONS
+# =====================================================
+# Single source of truth for the "virtual" curated collections that exist
+# only as URL slugs (no Collection database row). Reused by `discover`,
+# `collection_movies` and `collections_list` so every curated title and
+# description lives in exactly one place.
+CURATED_FALLBACK_COLLECTIONS = [
+    {
+        "slug": "hidden-gems",
+        "name": "Hidden Gems",
+        "description": "Underrated masterpieces waiting to be discovered.",
+        "icon": "💎",
+    },
+    {
+        "slug": "space-odyssey",
+        "name": "Space Odyssey",
+        "description": "Epic adventures beyond Earth and unknown galaxies.",
+        "icon": "🚀",
+    },
+    {
+        "slug": "mind-bending",
+        "name": "Mind Bending Cinema",
+        "description": "Movies that challenge reality and imagination.",
+        "icon": "🌀",
+    },
+]
+
+
+# =====================================================
 # COLLECTIONS LISTING
 # =====================================================
 
@@ -1220,26 +1265,8 @@ def collections_list(request):
     )
 
     # Fallback curated collections that exist only as URL slugs
-    fallback_collections = [
-        {
-            "slug": "hidden-gems",
-            "name": "Hidden Gems",
-            "description": "Underrated masterpieces waiting to be discovered.",
-            "icon": "💎",
-        },
-        {
-            "slug": "space-odyssey",
-            "name": "Space Odyssey",
-            "description": "Epic adventures beyond Earth.",
-            "icon": "🚀",
-        },
-        {
-            "slug": "mind-bending",
-            "name": "Mind Bending Cinema",
-            "description": "Movies that challenge reality.",
-            "icon": "🌀",
-        },
-    ]
+    # Reuse the single shared curated fallback constant (no inline dup).
+    fallback_collections = list(CURATED_FALLBACK_COLLECTIONS)
 
     existing_slugs = set(db_collections.values_list("slug", flat=True))
     fallback_collections = [

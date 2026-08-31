@@ -476,39 +476,21 @@ LuminaRecs {% endblock %} {% block extra_css %}
     Hand-picked cinematic journeys created by LuminaRecs AI.
   </p>
 
-  <div class="collection-grid">
-    {% for collection in collections %}
-    <a
-      href="{% url 'collection_movies' collection.slug %}"
-      class="collection-card"
-    >
-      <h3>{{ collection.title }}</h3>
-      <p>{{ collection.description }}</p>
-    </a>
-    {% empty %}
-    <a
-      href="{% url 'collection_movies' 'hidden-gems' %}"
-      class="collection-card"
-    >
-      <h3>Hidden Gems</h3>
-      <p>Underrated masterpieces waiting to be discovered.</p>
-    </a>
-    <a
-      href="{% url 'collection_movies' 'space-odyssey' %}"
-      class="collection-card"
-    >
-      <h3>Space Odyssey</h3>
-      <p>Epic adventures beyond Earth and unknown galaxies.</p>
-    </a>
-    <a
-      href="{% url 'collection_movies' 'mind-bending' %}"
-      class="collection-card"
-    >
-      <h3>Mind Bending Cinema</h3>
-      <p>Movies that challenge reality and imagination.</p>
-    </a>
-    {% endfor %}
-  </div>
+    <div class="collection-grid">
+      {% for collection in collections %}
+      <a
+        href="{% url 'collection_movies' collection.slug %}"
+        class="collection-card"
+      >
+        <h3>{{ collection.name }}</h3>
+        <p>{{ collection.description|default:"A curated cinematic selection." }}</p>
+      </a>
+      {% empty %}
+      <p class="section-subtitle">
+        No collections available yet. Check back soon.
+      </p>
+      {% endfor %}
+    </div>
 </section>
 
 <section class="section">

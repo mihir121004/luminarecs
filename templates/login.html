@@ -75,6 +75,7 @@
         width: 100%;
         height: 8vh;
         background: #000;
+        pointer-events: none; /* decorative bars must never block clicks */
         z-index: 950;
       }
 
@@ -173,7 +174,7 @@
         align-items: center;
         position: relative;
         z-index: 10;
-        padding: 140px 20px 80px;
+        padding: calc(6vh + 98px) 20px 80px;
       }
 
       .panel-wrap {
@@ -421,7 +422,7 @@
           font-size: 1.7rem;
         }
         .viewport {
-          padding: 130px 30px 70px;
+          padding: calc(6vh + 83px) 30px 70px;
         }
         .panel-wrap {
           max-width: 430px;
@@ -458,8 +459,8 @@
           font-size: 1.45rem;
         }
         .viewport {
-          padding: 120px 18px 60px;
-          align-items: flex-start;
+          padding: calc(4vh + 78px) 18px 60px;
+          align-items: center;
         }
         .panel-wrap {
           width: 100%;
@@ -516,7 +517,7 @@
           font-size: 1.3rem;
         }
         .viewport {
-          padding: 110px 15px 50px;
+          padding: calc(4vh + 78px) 15px 50px;
         }
         .panel {
           padding: 25px 20px;

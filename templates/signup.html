@@ -72,6 +72,7 @@
         width: 100%;
         height: 8vh;
         background: #000;
+        pointer-events: none; /* decorative bars must never block clicks */
         z-index: 950;
       }
 
@@ -164,10 +165,10 @@
         min-height: 100vh;
         display: flex;
         justify-content: center;
-        align-items: flex-start;
+        align-items: center;
         position: relative;
         z-index: 10;
-        padding: 110px 20px 90px;
+        padding: calc(6vh + 98px) 20px 90px;
       }
 
       .panel-wrap {
@@ -385,7 +386,7 @@
           padding: 0 50px;
         }
         .viewport {
-          padding: 150px 40px 80px;
+          padding: calc(6vh + 98px) 40px 80px;
         }
       }
 
@@ -403,7 +404,7 @@
           font-size: 1.7rem;
         }
         .viewport {
-          padding: 130px 25px 70px;
+          padding: calc(6vh + 83px) 25px 70px;
         }
         .panel {
           padding: 32px;
@@ -435,9 +436,9 @@
           font-size: 1.5rem;
         }
         .viewport {
-          align-items: flex-start;
+          align-items: center;
           min-height: 120px;
-          padding: 120px 15px 80px;
+          padding: calc(4vh + 73px) 15px 80px;
           overflow-y: auto;
         }
         .panel-wrap {
@@ -498,7 +499,7 @@
           font-size: 1.3rem;
         }
         .viewport {
-          padding: 110px 12px 50px;
+          padding: calc(4vh + 73px) 12px 50px;
         }
         .panel {
           padding: 25px 18px;
