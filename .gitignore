@@ -41,3 +41,6 @@ htmlcov/
 
 # Local dev tools (MailHog binary downloaded by scripts/mailhog.sh)
 scripts/.bin/
+
+# macOS AppleDouble junk
+._*
