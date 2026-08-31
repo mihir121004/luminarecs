@@ -194,6 +194,15 @@ DATABASES = {
     }
 }
 
+# SQLite hardening for the lightweight demo container (demo-deploy branch):
+# WAL lets readers proceed during writes and a busy timeout absorbs write
+# collisions (Render health checks + visitor traffic share one database).
+if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    DATABASES["default"]["OPTIONS"] = {
+        "timeout": 20,  # seconds to wait on a locked database instead of 500-ing
+        "init_command": "PRAGMA journal_mode=WAL;",
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
