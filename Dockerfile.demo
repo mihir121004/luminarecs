@@ -1,0 +1,45 @@
+# ==========================================================================
+# LUMINARECS — DEMO IMAGE (Render free tier, 512 MB RAM)
+#
+#   Same app as the production Dockerfile, but built from
+#   requirements-demo.txt: no torch/faiss/transformers (~2 GB lighter).
+#   Semantic search falls back to the TF-IDF recommender at runtime.
+#   SQLite + locmem cache, seeded from the committed movie fixture.
+#   Deployed via render.yaml (see docs/DEMO_DEPLOYMENT.md).
+# ==========================================================================
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        curl \
+        libgomp1 \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-demo.txt ./
+RUN pip install --upgrade pip && pip install -r requirements-demo.txt gunicorn
+
+COPY . .
+
+# Static files at build time; ownership fixed for the runtime user.
+# DEBUG=true is scoped to THIS build step only (.env is excluded from the
+# build context) so the production boot guard doesn't block collectstatic.
+RUN DEBUG=true python manage.py collectstatic --noinput \
+ && addgroup --system --gid 1000 app \
+ && adduser --system --uid 1000 --ingroup app app \
+ && mkdir -p /app/media /app/staticfiles \
+ && chown -R app:app /app/staticfiles /app/media
+
+USER app
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3 \
+    CMD curl -fsS -o /dev/null http://127.0.0.1:8000/ || exit 1
+
+CMD ["sh", "/app/entrypoint_demo.sh"]

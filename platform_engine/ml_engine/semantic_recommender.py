@@ -1,11 +1,22 @@
 import os
 import pickle
-import faiss
 import numpy as np
 
 from functools import lru_cache
 
-from sentence_transformers import SentenceTransformer
+# Heavy ML deps (faiss + sentence-transformers/torch). The lightweight demo
+# image (requirements-demo.txt) ships without them; when absent, semantic
+# recommendations fall back to the TF-IDF cosine recommender so every
+# feature keeps working. Full installs are unaffected.
+try:
+    import faiss
+    from sentence_transformers import SentenceTransformer
+
+    SEMANTIC_DEPS_AVAILABLE = True
+except ImportError:  # demo image only
+    faiss = None
+    SentenceTransformer = None
+    SEMANTIC_DEPS_AVAILABLE = False
 
 from ..models import Movie
 
@@ -86,10 +97,27 @@ def load_movie_mapping():
 # ===============================
 
 
+def _tfidf_fallback(movie_id, limit):
+    """TF-IDF cosine recommendations shaped like semantic results (demo image)."""
+    from .recommender import get_recommendations
+
+    return [
+        {
+            "movie": item["movie"],
+            "semantic_score": item.get("similarity"),
+            "reason": item["reason"],
+        }
+        for item in get_recommendations(movie_id, limit=limit)
+    ]
+
+
 def semantic_recommendations(
         movie_id,
         limit=6
 ):
+
+    if not SEMANTIC_DEPS_AVAILABLE:
+        return _tfidf_fallback(movie_id, limit)
 
     index = load_faiss()
 
