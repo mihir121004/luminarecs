@@ -173,11 +173,17 @@ class PublicPageSmokeTestCase(TestCase):
 
     def test_public_pages_render(self):
         for url_name in (
-            "lockscreen", "landing", "login", "signup", "homepage", "discover", "trailers",
+            "lockscreen", "landing", "login", "signup", "discover", "trailers",
         ):
             with self.subTest(url_name=url_name):
                 response = self.client.get(reverse(url_name))
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_homepage_redirects_anonymous_visitors_to_login(self):
+        """The homepage is auth-gated (@login_required): anonymous visitors are redirected."""
+        response = self.client.get(reverse("homepage"))
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertTrue(response.url.startswith(reverse("login")))
 
 
 class AuthenticatedPageSmokeTestCase(TestCase):
@@ -190,6 +196,9 @@ class AuthenticatedPageSmokeTestCase(TestCase):
         for url_name in ("profile", "watch_history"):
             with self.subTest(url_name=url_name):
                 self.assertEqual(self.client.get(reverse(url_name)).status_code, status.HTTP_200_OK)
+
+    def test_homepage_renders_when_logged_in(self):
+        self.assertEqual(self.client.get(reverse("homepage")).status_code, status.HTTP_200_OK)
 
     def test_wishlist_requires_post_and_can_be_updated(self):
         url = reverse("add_to_wishlist", args=[self.movie.id])
