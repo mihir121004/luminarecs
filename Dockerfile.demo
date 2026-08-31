@@ -32,8 +32,8 @@ COPY . .
 RUN DEBUG=true python manage.py collectstatic --noinput \
  && addgroup --system --gid 1000 app \
  && adduser --system --uid 1000 --ingroup app app \
- && mkdir -p /app/media /app/staticfiles \
- && chown -R app:app /app/staticfiles /app/media
+ && mkdir -p /app/media /app/staticfiles /app/logs \
+ && chown -R app:app /app/staticfiles /app/media /app/logs
 
 USER app
 
